@@ -25,7 +25,7 @@
 			</div>
 			<div id="description-bottom">
 				<h4>{date}</h4>
-				<h4 on:click={() => art.anew()}>marvin</h4>
+				<button on:click={() => art.anew()}>marvin</button>
 			</div>
 		</div>
 	</section>
@@ -41,6 +41,16 @@
 
 	h4 {
 		margin: 1rem 0;
+	}
+
+	button {
+		font-family: "Fira Sans";
+		font-weight: bold;
+		font-size: 1rem;
+		margin: 1rem 0;
+		border: 0;
+		padding: 0;
+		background-color: transparent;
 	}
 
 	#landing {
