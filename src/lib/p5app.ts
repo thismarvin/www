@@ -31,6 +31,7 @@ export function create(app: App): void {
 			height = app.parent.clientHeight;
 			canvas = p5.createCanvas(width, height);
 			canvas.parent(app.parent);
+			canvas.attribute("alt", "");
 
 			app.initialize(p5);
 		};
