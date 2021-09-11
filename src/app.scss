@@ -75,3 +75,9 @@ body {
 	--palette-light-gray: #e6e6e6;
 	--palette-white: #fcfcfc;
 }
+
+.centered {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
