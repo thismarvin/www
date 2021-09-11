@@ -61,6 +61,17 @@ body {
 	height: 100%;
 }
 
-#svelte {
-	height: 100%;
+body {
+	background-color: var(--palette-white);
+}
+
+:root {
+	--palette-black: #000000;
+	--palette-dark-purple: #0f004e;
+	--palette-gray: #595959;
+	--palette-gray-but-lighter: #cccccc;
+	--palette-purple: #b200ff;
+	--palette-red: #ff004d;
+	--palette-light-gray: #e6e6e6;
+	--palette-white: #fcfcfc;
 }
