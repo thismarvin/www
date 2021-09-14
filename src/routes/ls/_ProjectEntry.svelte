@@ -3,13 +3,13 @@
 	export let href = "/";
 	export let date = new Date();
 
-	const dateString = date.toISOString().substring(0, 7);
+	const iso = date.toISOString().substring(0, 7);
 </script>
 
 <div class="project">
 	<a {href}>
-		<span>~/Projects/{name}</span>
-		<span>{dateString}</span>
+		<span>{name}</span>
+		<span>{iso}</span>
 	</a>
 </div>
 

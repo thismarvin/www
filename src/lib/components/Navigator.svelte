@@ -7,10 +7,17 @@
 		href: string;
 	};
 
-	const navElements: NavElement[] = [
-		{ name: "Contact", href: "/contact" },
-		{ name: "Projects", href: "/ls" },
-		{ name: "Home", href: "/" },
+	function createNavElement(name: string, href: string): NavElement {
+		return {
+			name,
+			href,
+		};
+	}
+
+	const navElements = [
+		createNavElement("Contact", "/contact"),
+		createNavElement("Projects", "/ls"),
+		createNavElement("Home", "/"),
 	];
 
 	function selectHamburger() {

@@ -1,12 +1,25 @@
 <script lang="ts">
-	import ProjectEntry from "$lib/ProjectEntry.svelte";
-	import ProjectMetaData from "$lib/projectMetadata";
-	import RepeatRepeatRepeat from "$lib/RepeatRepeatRepeat.svelte";
+	import ProjectEntry from "./_ProjectEntry.svelte";
+	import RepeatRepeatRepeat from "$lib/components/RepeatRepeatRepeat.svelte";
 
-	const projects: ProjectMetaData[] = [
-		new ProjectMetaData("life", "/life", new Date("2021-09")),
-		new ProjectMetaData("sand", "/sand", new Date("2021-09")),
-		new ProjectMetaData("chess", "/chess", new Date("2021-09")),
+	type Project = {
+		name: string;
+		href: string;
+		date: Date;
+	};
+
+	function createProject(name: string, href: string, date: string): Project {
+		return {
+			name,
+			href,
+			date: new Date(date),
+		};
+	}
+
+	const projects: Project[] = [
+		createProject("life", "/life", "2021-08-25"),
+		createProject("sand", "/sand", "2021-09"),
+		createProject("chess", "/chess", "2021-09"),
 	];
 
 	const featured = 0;

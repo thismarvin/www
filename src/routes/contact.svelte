@@ -1,5 +1,5 @@
 <script lang="ts">
-	import RepeatRepeatRepeat from "$lib/RepeatRepeatRepeat.svelte";
+	import RepeatRepeatRepeat from "$lib/components/RepeatRepeatRepeat.svelte";
 </script>
 
 <svelte:head>
