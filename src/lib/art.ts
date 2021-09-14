@@ -471,5 +471,6 @@ export default class Art extends App {
 			this.#refresh = false;
 		}
 	}
+
 	draw(p5: p5): void {}
 }
