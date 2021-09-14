@@ -6,24 +6,26 @@
 	let art: Art;
 
 	// (•◡•)
+	// (◕‿◕✿)
 	onMount(() => {
-		art = new Art(document.querySelector("#display-container"));
+		art = new Art(document.querySelector("#canvas-container"));
 		create(art);
 	});
 
 	const date = new Date().toISOString().substring(0, 10);
 </script>
 
+<svelte:head>
+	<title>Home | thismarvin</title>
+</svelte:head>
+
 <main>
-	<section id="landing">
+	<section>
 		<div id="display">
-			<div id="description-top">
-				<h4>(◕‿◕✿)</h4>
+			<div id="canvas-wrapper">
+				<div id="canvas-container" />
 			</div>
-			<div id="display-wrapper">
-				<div id="display-container" />
-			</div>
-			<div id="description-bottom">
+			<div id="description">
 				<h4>{date}</h4>
 				<button on:click={() => art.anew()}>marvin</button>
 			</div>
@@ -35,8 +37,14 @@
 	@import "../mixins.scss";
 
 	main {
+		display: flex;
+		height: 100%;
+	}
+
+	section {
+		margin: auto;
+		padding: 1rem;
 		width: 100%;
-		height: calc(100% - 51px);
 	}
 
 	h4 {
@@ -53,45 +61,29 @@
 		background-color: transparent;
 	}
 
-	#landing {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		flex-direction: column;
-
-		height: 100%;
-	}
-
 	#display {
-		padding: 1rem;
-		width: calc(100% - 2rem);
+		width: 100%;
 
 		@include medium {
 			max-width: calc(75vmin);
 		}
 	}
 
-	#display-wrapper {
+	#canvas-wrapper {
 		position: relative;
 		padding-top: calc(1 / (1 / 1) * 100%);
 	}
 
-	#display-container {
+	#canvas-container {
 		position: absolute;
 		top: 0;
 		left: 0;
 		width: 100%;
 		height: 100%;
-		box-shadow: 0.5rem 0.5rem 1rem rgba(#000000, 0.25);
+		box-shadow: 0.5rem 0.5rem 1rem rgba(#000000, 0.2);
 	}
 
-	#description-top {
-		display: flex;
-		justify-content: flex-end;
-		color: rgba(0, 0, 0, 0.04);
-	}
-
-	#description-bottom {
+	#description {
 		display: flex;
 		justify-content: space-between;
 	}
