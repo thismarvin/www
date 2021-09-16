@@ -54,7 +54,11 @@
 					on:click={selectHamburger}
 					style="background-image: url({buttonImage})"
 				>
-					<span class="label">Open global navigation menu</span>
+					<span class="label"
+						>{hamburgerSelected
+							? "Close global navigation menu"
+							: "Open global navigation menu"}</span
+					>
 				</button>
 			</li>
 		</ul>
