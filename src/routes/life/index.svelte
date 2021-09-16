@@ -25,7 +25,11 @@
 			<li>
 				<a href="https://youtu.be/R9Plq-D1gEk">Numberphile YouTube video</a>
 			</li>
-			<li><a href="https://github.com/thismarvin">View source code</a></li>
+			<li>
+				<a href="https://github.com/thismarvin/www/tree/dev/src/routes/life"
+					>View source code</a
+				>
+			</li>
 		</ul>
 	</div>
 </footer>
