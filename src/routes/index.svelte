@@ -62,7 +62,7 @@
 	}
 
 	#display {
-		width: 100%;
+		margin: auto;
 
 		@include medium {
 			max-width: calc(75vmin);
