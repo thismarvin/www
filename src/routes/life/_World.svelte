@@ -39,7 +39,22 @@
 		data.push(new Array(width).fill(CellType.Dead));
 	}
 
-	randomize();
+	function _surround(data: CellType[][], x: number, y: number): void {
+		for (let j = 0; j < 3; ++j) {
+			for (let i = 0; i < 3; ++i) {
+				if (i === 1 && j === 1) {
+					continue;
+				}
+
+				data[y - 1 + j][x - 1 + i] = CellType.Alive;
+			}
+		}
+	}
+
+	_surround(data, 7 + 3, 7 - 3);
+	_surround(data, 7 + 3, 7 + 3);
+	_surround(data, 7 - 3, 7 + 3);
+	_surround(data, 7 - 3, 7 - 3);
 
 	function togglePlay() {
 		paused = !paused;
