@@ -48,6 +48,6 @@
 		left: 0;
 		width: 100%;
 		height: 100%;
-		box-shadow: 0 0.5rem 1rem rgba(#000000, 0.1);
+		box-shadow: var(--secondary-box-shadow);
 	}
 </style>

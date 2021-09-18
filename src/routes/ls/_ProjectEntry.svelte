@@ -21,7 +21,7 @@
 		text-decoration: none;
 		padding: 1rem;
 		width: calc(100% - 2rem);
-		box-shadow: 0.5rem 0.5rem 1rem rgba(#000000, 0.2);
+		box-shadow: var(--primary-box-shadow);
 		color: var(--palette-white);
 		background-color: var(--palette-black);
 	}

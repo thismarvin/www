@@ -205,7 +205,7 @@
 	}
 
 	li {
-		padding-right: 1rem;
+		padding-right: 0.5rem;
 	}
 
 	li:last-child {
@@ -220,10 +220,7 @@
 		padding: 1em 1.5em;
 		color: var(--palette-white);
 		background-color: var(--palette-black);
-	}
-
-	.world {
-		padding: 1rem;
+		border-radius: 2em;
 	}
 
 	.grid-wrapper {
@@ -235,7 +232,7 @@
 		--size: min(calc((100vw - 2rem - 1rem - 2px * 16) / 15), 30px);
 		border-top: 2px solid var(--palette-light-gray);
 		border-left: 2px solid var(--palette-light-gray);
-		box-shadow: 1rem 1rem 1rem rgba(#000000, 0.1);
+		box-shadow: 1rem 1rem 1rem rgba(#000000, 0.2);
 	}
 
 	.control-panel {

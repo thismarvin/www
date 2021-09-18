@@ -51,7 +51,8 @@
 
 <style lang="scss">
 	section {
-		padding: 2rem 2rem calc(2rem + var(--nav-height)) 2rem;
+		padding: 2rem;
+		padding-bottom: calc(2rem + var(--nav-height));
 		width: calc(100% - 4rem);
 	}
 

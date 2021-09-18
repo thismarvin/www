@@ -7,15 +7,13 @@
 </svelte:head>
 
 <main>
-	<section class="centered">
+	<section>
 		<World />
 	</section>
 </main>
 <footer>
-	<hr />
-	<h3>Conway's Game of Life</h3>
 	<div id="links">
-		<h4>Learn More</h4>
+		<h4>Conway's Game of Life</h4>
 		<ul>
 			<li>
 				<a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life"
@@ -36,20 +34,17 @@
 
 <style lang="scss">
 	section {
-		height: calc(100vh - 4rem - var(--nav-height));
+		padding: 4rem 1rem;
 	}
 
 	footer {
-		padding: 2rem 2rem calc(2rem + var(--nav-height)) 2rem;
-	}
-
-	hr {
-		border: 0;
-		height: 0.1rem;
-		background-color: var(--palette-black);
+		padding: 4rem 2rem;
+		padding-bottom: calc(4rem + var(--nav-height));
+		background-color: var(--palette-almost-white);
 	}
 
 	h4 {
+		margin: 0;
 		margin-bottom: 0.75rem;
 	}
 
@@ -68,9 +63,8 @@
 		font-size: 0.9rem;
 		text-decoration: none;
 		border-top: 0.1rem solid var(--palette-light-gray);
-		padding: 0.5rem;
+		padding: 0.5rem 0;
 		width: 100%;
-		color: var(--palette-black);
-		background-color: var(--palette-white);
+		color: var(--secondary-text-color);
 	}
 </style>

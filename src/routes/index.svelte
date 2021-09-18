@@ -52,12 +52,13 @@
 	}
 
 	button {
-		font-family: "Fira Sans";
-		font-weight: bold;
+		font-family: "Fira Sans", sans-serif;
+		font-weight: 600;
 		font-size: 1rem;
 		margin: 1rem 0;
 		border: 0;
 		padding: 0;
+		color: var(--primary-text-color);
 		background-color: transparent;
 	}
 
@@ -80,7 +81,7 @@
 		left: 0;
 		width: 100%;
 		height: 100%;
-		box-shadow: 0.5rem 0.5rem 1rem rgba(#000000, 0.2);
+		box-shadow: var(--primary-box-shadow);
 	}
 
 	#description {

@@ -124,7 +124,7 @@
 		height: 2.1rem;
 		background-color: var(--palette-white);
 		border-radius: 100rem;
-		box-shadow: 0 0 1rem rgba(#000000, 0.1);
+		box-shadow: var(--secondary-box-shadow);
 	}
 
 	.hamburger {
