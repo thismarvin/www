@@ -3,7 +3,7 @@
 	export let href = "/";
 	export let date = new Date();
 
-	const iso = date.toISOString().substring(0, 7);
+	$: iso = date.toISOString().substring(0, 7);
 </script>
 
 <div class="project">
