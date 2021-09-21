@@ -22,7 +22,7 @@
 		padding: 1rem;
 		width: calc(100% - 2rem);
 		box-shadow: var(--primary-box-shadow);
-		color: var(--palette-white);
-		background-color: var(--palette-black);
+		color: var(--primary-text-color);
+		background-color: var(--palette-white);
 	}
 </style>
