@@ -112,7 +112,7 @@
 						<div class="year">
 							{#each Array(52) as _, x}
 								<div class="week">
-									<div class="inner {y * 52 + x <= rolling ? 'lived' : ''}" />
+									<div class="inner {y * 52 + x < rolling ? 'lived' : ''}" />
 								</div>
 							{/each}
 						</div>
