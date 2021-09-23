@@ -1,35 +1,67 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import ProjectFooter from "$lib/components/ProjectFooter.svelte";
+	import { onMount } from "svelte";
+	import { page } from "$app/stores";
 
 	const msInDay = 1000 * 60 * 60 * 24;
 	const msInWeek = msInDay * 7;
 	const msInYear = msInDay * 365;
 
-	let submitted = false;
+	const regexISO = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 	let expectancy = 79;
 
-	let dob = "2000-03-17";
+	let validDate = false;
+	let parseError = "";
 
-	let years = 0;
+	let age = 0;
 	let weeks = 0;
 
 	let target = 1 / 120;
 	let rolling = 0;
 
-	$: {
+	$: dob = $page.query.get("dob");
+	$: receivedQuery = dob !== null;
+
+	$: if (receivedQuery) {
+		[validDate, parseError] = isValidDate(dob);
+	}
+
+	$: if (validDate) {
 		const ms = new Date().valueOf() - new Date(dob).valueOf();
 
-		years = Math.trunc(ms / msInYear);
+		age = Math.trunc(ms / msInYear);
 		weeks = Math.trunc(ms / msInWeek);
 
-		target = Math.max(years / weeks, 1 / 120);
+		target = Math.max(age / weeks, 1 / 120);
 		rolling = 0;
 	}
 
+	function isValidDate(date: string): [boolean, string?] {
+		if (!regexISO.test(date)) {
+			return [
+				false,
+				`The given date does not follow the ISO 8601 standard (e.g. ${new Date()
+					.toISOString()
+					.substring(0, 10)}).`,
+			];
+		}
+
+		const ms = new Date(date).valueOf();
+
+		if (isNaN(ms)) {
+			return [false, "The given date does not exist."];
+		}
+
+		if (ms > new Date().valueOf()) {
+			return [false, "Time travel is dangerous!"];
+		}
+
+		return [true, null];
+	}
+
 	function update() {
-		if (!submitted) {
+		if (!validDate) {
 			return;
 		}
 
@@ -79,29 +111,23 @@
 
 <main>
 	<section>
-		{#if !submitted}
+		{#if !validDate}
 			<form action="">
 				<div id="date-wrapper">
 					<label for="birthday">Enter your date of birth:</label>
-					<input
-						class="input-date"
-						type="date"
-						name="birthday"
-						bind:value={dob}
-					/>
+					<input class="input-date" type="date" name="dob" value="2000-03-17" />
 				</div>
 				<div id="button-wrapper">
-					<input
-						class="input-button"
-						type="button"
-						value="Generate Calendar"
-						on:click={() => (submitted = true)}
-					/>
+					<input class="input-button" type="submit" value="Generate Calendar" />
 				</div>
 			</form>
-		{/if}
-
-		{#if submitted}
+			{#if receivedQuery}
+				<div id="error">
+					<h4>Parse Error:</h4>
+					<p>{parseError}</p>
+				</div>
+			{/if}
+		{:else}
 			<div id="top">
 				<h4>{new Date().toLocaleDateString()}</h4>
 				<h4>{rolling} week{rolling > 1 ? "s" : ""}</h4>
@@ -225,6 +251,10 @@
 		--size: calc((100vw - 2rem - 4px - 53px) / 52);
 		border-left: 1px solid var(--palette-light-gray);
 		border-top: 1px solid var(--palette-light-gray);
+	}
+
+	#error {
+		padding: 1rem;
 	}
 
 	.year {
