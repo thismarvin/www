@@ -205,11 +205,13 @@
 	}
 
 	#sorter button {
+		font-family: "Fira Sans", sans-serif;
+		font-size: min(3.5vw, 12px);
 		display: flex;
 		margin: 0;
-		border: 0.1rem solid var(--palette-light-gray);
-		padding: 0.5rem 1rem;
-		border-radius: 2rem;
+		border: 0.1em solid var(--palette-light-gray);
+		padding: 0.5em 1em;
+		border-radius: 2em;
 		color: var(--secondary-text-color);
 		background-color: var(--palette-white);
 	}

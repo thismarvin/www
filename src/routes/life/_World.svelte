@@ -229,13 +229,14 @@
 
 	button {
 		font-family: "Fira Sans", sans-serif;
-		font-size: min(3.4vw, 14px);
-		font-weight: 600;
-		border: none;
-		padding: 1em 1.5em;
-		color: var(--palette-white);
-		background-color: var(--palette-black);
+		font-size: min(3.5vw, 14px);
+		font-weight: 500;
+		margin: 0;
+		border: 0.2em solid var(--palette-light-gray);
+		padding: 1em 1.75em;
 		border-radius: 2em;
+		color: var(--secondary-text-color);
+		background-color: var(--palette-white);
 	}
 
 	.grid-wrapper {
