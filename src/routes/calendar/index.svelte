@@ -1,40 +1,20 @@
 <script lang="ts">
+	import Calendar from "./_Calendar.svelte";
 	import ProjectFooter from "$lib/components/ProjectFooter.svelte";
-	import { onMount } from "svelte";
 	import { page } from "$app/stores";
-
-	const msInDay = 1000 * 60 * 60 * 24;
-	const msInWeek = msInDay * 7;
-	const msInYear = msInDay * 365;
 
 	const regexISO = /^(\d{4})-(\d{2})-(\d{2})$/;
 
-	let expectancy = 79;
+	let lifeExpectancy = 79;
 
 	let validDate = false;
 	let parseError = "";
-
-	let age = 0;
-	let weeks = 0;
-
-	let target = 1 / 120;
-	let rolling = 0;
 
 	$: dob = $page.query.get("dob");
 	$: receivedQuery = dob !== null;
 
 	$: if (receivedQuery) {
 		[validDate, parseError] = isValidDate(dob);
-	}
-
-	$: if (validDate) {
-		const ms = new Date().valueOf() - new Date(dob).valueOf();
-
-		age = Math.trunc(ms / msInYear);
-		weeks = Math.trunc(ms / msInWeek);
-
-		target = Math.max(age / weeks, 1 / 120);
-		rolling = 0;
 	}
 
 	function isValidDate(date: string): [boolean, string?] {
@@ -59,50 +39,6 @@
 
 		return [true, null];
 	}
-
-	function update() {
-		if (!validDate) {
-			return;
-		}
-
-		rolling = rolling < weeks ? rolling + 1 : weeks;
-	}
-
-	const maxFrameSkip = 10;
-	const maxDeltaTime = maxFrameSkip * target;
-
-	let totalElapsedTime = 0;
-	let accumulator = 0;
-
-	function loop(timeStamp: number) {
-		let deltaTime = (timeStamp - totalElapsedTime) / 1000;
-
-		if (Number.isNaN(deltaTime)) {
-			deltaTime = 0;
-		}
-
-		if (deltaTime > maxDeltaTime) {
-			deltaTime = maxDeltaTime;
-		}
-
-		totalElapsedTime = timeStamp;
-
-		accumulator += deltaTime;
-
-		while (accumulator >= target) {
-			update();
-
-			accumulator -= target;
-		}
-
-		/* if (rolling >= weeks) {
-			return;
-		} */
-
-		requestAnimationFrame((timeStamp) => loop(timeStamp));
-	}
-
-	onMount(() => loop(0));
 </script>
 
 <svelte:head>
@@ -128,23 +64,7 @@
 				</div>
 			{/if}
 		{:else}
-			<div id="top">
-				<h4>{new Date().toLocaleDateString()}</h4>
-				<h4>{rolling} week{rolling > 1 ? "s" : ""}</h4>
-			</div>
-			<div id="calendar-wrapper">
-				<div id="calendar">
-					{#each Array(expectancy) as _, y}
-						<div class="year">
-							{#each Array(52) as _, x}
-								<div class="week">
-									<div class="inner {y * 52 + x < rolling ? 'lived' : ''}" />
-								</div>
-							{/each}
-						</div>
-					{/each}
-				</div>
-			</div>
+			<Calendar {lifeExpectancy} {dob} />
 		{/if}
 	</section>
 </main>
@@ -215,15 +135,6 @@
 		background-color: var(--palette-white);
 	}
 
-	#top {
-		display: flex;
-		justify-content: space-between;
-	}
-
-	#top h4 {
-		margin: 1rem 0;
-	}
-
 	#date-wrapper {
 		display: flex;
 		flex-direction: column;
@@ -242,42 +153,7 @@
 		border-radius: 0.5rem;
 	}
 
-	#calendar-wrapper {
-		border: 2px solid var(--palette-black);
-		box-shadow: var(--secondary-box-shadow);
-	}
-
-	#calendar {
-		--size: calc((100vw - 2rem - 4px - 53px) / 52);
-		border-left: 1px solid var(--palette-light-gray);
-		border-top: 1px solid var(--palette-light-gray);
-	}
-
 	#error {
 		padding: 1rem;
-	}
-
-	.year {
-		display: flex;
-	}
-
-	.week {
-		width: var(--size);
-		height: var(--size);
-		border-right: 1px solid var(--palette-light-gray);
-		border-bottom: 1px solid var(--palette-light-gray);
-		background-color: var(--palette-white);
-	}
-
-	.inner {
-		width: var(--size);
-		height: var(--size);
-		background-color: var(--palette-black);
-		opacity: 0;
-		transition: opacity 0.5s ease-in;
-	}
-
-	.lived {
-		opacity: 1;
 	}
 </style>
