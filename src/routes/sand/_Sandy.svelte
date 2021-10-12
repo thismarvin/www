@@ -36,9 +36,25 @@
 	const rockColors = ["#b884ff", "#a271ff", "#935bf2", "#7951e3"];
 	const smokeColors = ["#ebebeb"];
 
+	let simulationPaused = true;
+	let repaint = false;
+
 	let currentMaterial = Material.Sand;
 
 	const smartPointer = new SmartPointer();
+
+	function setCurrentMaterial(material: number): void {
+		currentMaterial = material;
+	}
+
+	function toggleSimulation(): void {
+		simulationPaused = !simulationPaused;
+	}
+
+	function clearWorld(): void {
+		world.clear();
+		repaint = true;
+	}
 
 	function randomRange(min: number, max: number): number {
 		return min + Math.floor(Math.random() * (max - min));
@@ -109,26 +125,36 @@
 				getTint(),
 				getSpread(currentMaterial)
 			);
+			repaint = true;
 		}
 
-		world.simulate();
+		if (!simulationPaused) {
+			world.simulate();
+		}
 	}
 
 	function draw() {
+		if (simulationPaused && !repaint) {
+			return;
+		}
+
 		ctx.fillStyle = "#ffffff";
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		let size = Math.ceil(cellSize);
+		const size = Math.ceil(cellSize);
 
 		for (let y = 0; y < height; ++y) {
 			for (let x = 0; x < width; ++x) {
-				const material = cells[y * width + x];
-				const tint = tints[y * width + x];
+				const index = y * width + x;
+				const material = cells[index];
+				const tint = tints[index];
 
 				ctx.fillStyle = getColor(material, tint);
 				ctx.fillRect(x * cellSize, y * cellSize, size, size);
 			}
 		}
+
+		repaint = false;
 	}
 
 	const target = 1 / 60;
@@ -192,9 +218,53 @@
 	});
 </script>
 
-<div id="parent" class="canvas-wrapper">
-	<div class="canvas-container">
-		<canvas id="sandCanvas" />
+<div>
+	<div id="parent" class="canvas-wrapper">
+		<div class="canvas-container">
+			<canvas id="sandCanvas" />
+		</div>
+	</div>
+	<div>
+		<ul>
+			<li>
+				<button
+					class="material-picker"
+					on:click={() => setCurrentMaterial(Material.Sand)}>Sand</button
+				>
+			</li>
+			<li>
+				<button
+					class="material-picker"
+					on:click={() => setCurrentMaterial(Material.Water)}>Water</button
+				>
+			</li>
+			<li>
+				<button
+					class="material-picker"
+					on:click={() => setCurrentMaterial(Material.Rock)}>Rock</button
+				>
+			</li>
+			<li>
+				<button
+					class="material-picker"
+					on:click={() => setCurrentMaterial(Material.Smoke)}>Smoke</button
+				>
+			</li>
+			<li>
+				<button
+					class="material-picker"
+					on:click={() => setCurrentMaterial(Material.Air)}>Air</button
+				>
+			</li>
+		</ul>
+		<ul>
+			<li>
+				<button on:click={toggleSimulation}
+					>{simulationPaused ? "Resume" : "Pause"}</button
+				>
+			</li>
+			<li><button on:click={clearWorld}>Clear</button></li>
+		</ul>
 	</div>
 </div>
 
