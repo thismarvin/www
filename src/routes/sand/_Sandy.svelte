@@ -1,6 +1,7 @@
 <script lang="ts">
 	import init, { Material, Tint, World } from "./_sand";
 	import { onMount } from "svelte";
+	import { makeNoise2D } from "open-simplex-noise";
 	import SmartPointer from "$lib/pointer";
 
 	interface InitOutput {
@@ -14,7 +15,9 @@
 
 	let world: World | null = null;
 	let cellsPtr: number | null = null;
+	let tintsPtr: number | null = null;
 	let cells: Uint8Array | null = null;
+	let tints: Uint8Array | null = null;
 
 	let parent: HTMLElement | null = null;
 	let canvas: HTMLCanvasElement | null = null;
@@ -24,7 +27,70 @@
 	let cellSize = 0;
 	let brushRadius = 4;
 
+	const tintNoise = makeNoise2D(Date.now());
+	const tintNoiseStep = 0.05;
+	let tintNoiseIndex = 0;
+
+	const sandColors = ["#ffd5c3", "#ffcbba", "#f1b3b6", "#e7a5ab"];
+	const waterColors = ["#7094ff"];
+	const rockColors = ["#b884ff", "#a271ff", "#935bf2", "#7951e3"];
+	const smokeColors = ["#ebebeb"];
+
+	let currentMaterial = Material.Sand;
+
 	const smartPointer = new SmartPointer();
+
+	function randomRange(min: number, max: number): number {
+		return min + Math.floor(Math.random() * (max - min));
+	}
+
+	function getSpread(material: number): number {
+		switch (material) {
+			case Material.Sand:
+				return randomRange(1, 4 + 1);
+			case Material.Water:
+				return randomRange(4, 6 + 1);
+			case Material.Smoke:
+				return randomRange(1, 6 + 1);
+			default:
+				return 0;
+		}
+	}
+
+	function getTint(): number {
+		let rand = tintNoise(tintNoiseIndex, 0);
+		tintNoiseIndex += tintNoiseStep;
+
+		if (rand < -0.5) {
+			return Tint.None;
+		} else if (rand < 0) {
+			return Tint.Dark;
+		} else if (rand < 0.5) {
+			return Tint.Darker;
+		} else {
+			return Tint.Darkest;
+		}
+	}
+
+	function getColor(material: number, tint: number): string {
+		switch (material) {
+			case Material.Sand: {
+				return sandColors[tint];
+			}
+			case Material.Water: {
+				return waterColors[0];
+			}
+			case Material.Rock: {
+				return rockColors[tint];
+			}
+			case Material.Smoke: {
+				return smokeColors[0];
+			}
+			default: {
+				return "#ffffff";
+			}
+		}
+	}
 
 	function update() {
 		smartPointer.update();
@@ -33,7 +99,16 @@
 			const x1 = Math.floor(smartPointer.x / scale);
 			const y1 = Math.floor(smartPointer.y / scale);
 
-			world.paint(x1, y1, x1, y1, brushRadius, Material.Sand, Tint.None, 4);
+			world.paint(
+				x1,
+				y1,
+				x1,
+				y1,
+				brushRadius,
+				currentMaterial,
+				getTint(),
+				getSpread(currentMaterial)
+			);
 		}
 
 		world.simulate();
@@ -47,15 +122,10 @@
 
 		for (let y = 0; y < height; ++y) {
 			for (let x = 0; x < width; ++x) {
-				switch (cells[y * width + x]) {
-					case Material.Sand: {
-						ctx.fillStyle = "#ffd5c3";
-						break;
-					}
-					default: {
-						continue;
-					}
-				}
+				const material = cells[y * width + x];
+				const tint = tints[y * width + x];
+
+				ctx.fillStyle = getColor(material, tint);
 				ctx.fillRect(x * cellSize, y * cellSize, size, size);
 			}
 		}
@@ -99,7 +169,9 @@
 
 		world = World.with_size(width, height);
 		cellsPtr = world.data();
+		tintsPtr = world.tints();
 		cells = new Uint8Array(wasm.memory.buffer, cellsPtr, width * height);
+		tints = new Uint8Array(wasm.memory.buffer, tintsPtr, width * height);
 
 		parent = document.getElementById("parent");
 		canvas = document.getElementById("sandCanvas") as HTMLCanvasElement;
