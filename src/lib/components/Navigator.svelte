@@ -40,19 +40,15 @@
 	{/if}
 
 	<div id="menu">
-		<div id="button-wrapper" class="centered">
-			<button
-				class="hamburger"
-				on:click={toggleNav}
-				style="background-image: url({buttonImage})"
-			>
+		<button class="centered" on:click={toggleNav}>
+			<div class="hamburger" style="background-image: url({buttonImage})">
 				<span class="label"
 					>{showNav
 						? "Close global navigation menu"
 						: "Open global navigation menu"}</span
 				>
-			</button>
-		</div>
+			</div>
+		</button>
 	</div>
 </div>
 
@@ -71,7 +67,12 @@
 		border: 0;
 		margin: 0;
 		padding: 0;
-		border-radius: 5rem;
+		width: 3rem;
+		height: 3rem;
+		border-radius: 100rem;
+		background-color: var(--palette-white);
+		box-shadow: var(--secondary-box-shadow);
+		pointer-events: all;
 	}
 
 	h4 {
@@ -100,6 +101,7 @@
 		margin-bottom: 1rem;
 		border-radius: 1rem;
 		box-shadow: 0 0 1rem rgba(#000000, 0.2);
+		pointer-events: all;
 	}
 
 	#navigator {
@@ -111,20 +113,13 @@
 		overflow: hidden;
 		padding: 1rem 1rem 2rem 1rem;
 		width: calc(100% - 2rem);
+		pointer-events: none;
 	}
 
 	#menu {
 		display: flex;
 		justify-content: flex-end;
-	}
-
-	#button-wrapper {
-		padding: 0.5rem;
-		width: 2.1rem;
-		height: 2.1rem;
-		background-color: var(--palette-white);
-		border-radius: 100rem;
-		box-shadow: var(--secondary-box-shadow);
+		height: 3rem;
 	}
 
 	.hamburger {
