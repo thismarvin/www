@@ -1,24 +1,9 @@
-export class PointerState {
-	public readonly event: PointerEvent;
-
-	constructor(event: PointerEvent) {
-		this.event = event;
-
-		Object.defineProperty(this, "event", {
-			writable: false,
-		});
-	}
-}
-
 /**
  * Returns whether or not a given button is pressed on the mouse.
  * @param button A single mouse button, or multiple comma separated mouse buttons (e.g. leftclick, rightclick, etc.).
  * @param pointerState The current PointerState to test against.
  */
-export function isButtonDown(
-	button: string,
-	pointerState: PointerState
-): boolean {
+export function isButtonDown(event: PointerEvent, button: string): boolean {
 	// Format and separate "button" parameter into individual strings;
 	const formattedButtons = button.toLocaleLowerCase().split(",");
 	// Duplicate button strings would break this method, so get rid of them!
@@ -40,7 +25,27 @@ export function isButtonDown(
 		}
 	}
 
-	return (pointerState.event.buttons & computedButtons) !== 0;
+	return (event.buttons & computedButtons) !== 0;
+}
+
+export class PointerState {
+	public readonly event: PointerEvent;
+
+	constructor(event: PointerEvent) {
+		this.event = event;
+
+		Object.defineProperty(this, "event", {
+			writable: false,
+		});
+	}
+
+	public isButtonDown(button: string): boolean {
+		return isButtonDown(this.event, button);
+	}
+
+	public isButtonUp(button: string): boolean {
+		return !isButtonDown(this.event, button);
+	}
 }
 
 export default class SmartPointer {
@@ -53,6 +58,7 @@ export default class SmartPointer {
 
 	#element: HTMLElement | null;
 	#lastEvent: PointerEvent | null = null;
+
 	#previousPointerState: PointerState | null;
 	#currentPointerState: PointerState | null;
 	#x: number;
@@ -83,7 +89,7 @@ export default class SmartPointer {
 		});
 	}
 
-	public getState(): PointerState {
+	public getState(): PointerState | null {
 		if (this.#lastEvent === null) {
 			return null;
 		}
@@ -100,14 +106,9 @@ export default class SmartPointer {
 		}
 
 		return (
-			!isButtonDown(button, this.#previousPointerState) &&
-			isButtonDown(button, this.#currentPointerState)
+			this.#previousPointerState.isButtonUp(button) &&
+			this.#currentPointerState.isButtonDown(button)
 		);
-	}
-
-	public debug(): void {
-		console.log(this.#currentPointerState.event);
-		console.log(this.#element);
 	}
 
 	public pressing(button: string): boolean {
@@ -115,7 +116,7 @@ export default class SmartPointer {
 			return false;
 		}
 
-		return isButtonDown(button, this.#currentPointerState);
+		return this.#currentPointerState.isButtonDown(button);
 	}
 
 	public update(): void {
