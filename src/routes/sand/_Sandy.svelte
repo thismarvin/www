@@ -8,6 +8,10 @@
 		readonly memory: WebAssembly.Memory;
 	}
 
+	function randomRange(min: number, max: number): number {
+		return min + Math.floor(Math.random() * (max - min));
+	}
+
 	let wasm: InitOutput | null = null;
 
 	const width = 128;
@@ -27,9 +31,13 @@
 	let cellSize = 0;
 	let brushRadius = 4;
 
-	const tintNoise = makeNoise2D(Date.now());
+	const noise = makeNoise2D(Date.now());
 	const tintNoiseStep = 0.05;
-	let tintNoiseIndex = 0;
+	let tintNoiseIndex = randomRange(-42, 42 + 1);
+	const waterNoiseStep = 0.1;
+	let waterNoiseIndex = 0;
+	const smokeNoiseStep = -0.15;
+	let smokeNoiseIndex = randomRange(-210, 210 + 1);
 
 	const sandColors = ["#ffd5c3", "#ffcbba", "#f1b3b6", "#e7a5ab"];
 	const waterColors = ["#7094ff"];
@@ -56,10 +64,6 @@
 		repaint = true;
 	}
 
-	function randomRange(min: number, max: number): number {
-		return min + Math.floor(Math.random() * (max - min));
-	}
-
 	function getSpread(material: number): number {
 		switch (material) {
 			case Material.Sand:
@@ -74,7 +78,7 @@
 	}
 
 	function getTint(): number {
-		let rand = tintNoise(tintNoiseIndex, 0);
+		let rand = noise(tintNoiseIndex, 0);
 		tintNoiseIndex += tintNoiseStep;
 
 		if (rand < -0.5) {
@@ -108,6 +112,44 @@
 		}
 	}
 
+	function getAlpha(material: number, x: number, y: number): string {
+		let alpha = 255;
+
+		switch (material) {
+			case Material.Water: {
+				alpha =
+					Math.floor(
+						((1 + noise((x + waterNoiseIndex) / 15, y / 10)) / 2) * 100
+					) + 155;
+
+				break;
+			}
+
+			case Material.Rock: {
+				alpha = Math.floor(((1 + noise(x / 4, y / 2)) / 2) * 55) + 200;
+
+				break;
+			}
+
+			case Material.Smoke: {
+				alpha =
+					Math.floor(
+						((1 + noise((x + smokeNoiseIndex) / 5, y / 15)) / 2) * 200
+					) + 55;
+
+				break;
+			}
+
+			default: {
+				alpha = Math.floor(((1 + noise(x / 5, y / 5)) / 2) * 30) + 225;
+
+				break;
+			}
+		}
+
+		return alpha.toString(16);
+	}
+
 	function update() {
 		smartPointer.update();
 
@@ -129,6 +171,8 @@
 		}
 
 		if (!simulationPaused) {
+			waterNoiseIndex += waterNoiseStep;
+			smokeNoiseIndex += smokeNoiseStep;
 			world.simulate();
 		}
 	}
@@ -150,6 +194,8 @@
 				const tint = tints[index];
 
 				ctx.fillStyle = getColor(material, tint);
+				ctx.fillStyle += getAlpha(material, x, y);
+
 				ctx.fillRect(x * cellSize, y * cellSize, size, size);
 			}
 		}
