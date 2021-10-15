@@ -53,6 +53,13 @@ export const Tint = Object.freeze({
 /**
  */
 export class Size {
+	static __wrap(ptr) {
+		const obj = Object.create(Size.prototype);
+		obj.ptr = ptr;
+
+		return obj;
+	}
+
 	__destroy_into_raw() {
 		const ptr = this.ptr;
 		this.ptr = 0;
@@ -63,6 +70,30 @@ export class Size {
 	free() {
 		const ptr = this.__destroy_into_raw();
 		wasm.__wbg_size_free(ptr);
+	}
+	/**
+	 */
+	get width() {
+		var ret = wasm.__wbg_get_size_width(this.ptr);
+		return ret >>> 0;
+	}
+	/**
+	 * @param {number} arg0
+	 */
+	set width(arg0) {
+		wasm.__wbg_set_size_width(this.ptr, arg0);
+	}
+	/**
+	 */
+	get height() {
+		var ret = wasm.__wbg_get_size_height(this.ptr);
+		return ret >>> 0;
+	}
+	/**
+	 * @param {number} arg0
+	 */
+	set height(arg0) {
+		wasm.__wbg_set_size_height(this.ptr, arg0);
 	}
 }
 /**
@@ -89,31 +120,25 @@ export class World {
 	/**
 	 * @param {number} width
 	 * @param {number} height
+	 * @param {number} chunk_size
 	 * @returns {World}
 	 */
-	static with_size(width, height) {
-		var ret = wasm.world_with_size(width, height);
+	static create(width, height, chunk_size) {
+		var ret = wasm.world_create(width, height, chunk_size);
 		return World.__wrap(ret);
 	}
 	/**
-	 * @returns {number}
+	 * @returns {Size}
 	 */
-	width() {
-		var ret = wasm.world_width(this.ptr);
-		return ret >>> 0;
+	size() {
+		var ret = wasm.world_size(this.ptr);
+		return Size.__wrap(ret);
 	}
 	/**
 	 * @returns {number}
 	 */
-	height() {
-		var ret = wasm.world_height(this.ptr);
-		return ret >>> 0;
-	}
-	/**
-	 * @returns {number}
-	 */
-	data() {
-		var ret = wasm.world_data(this.ptr);
+	materials() {
+		var ret = wasm.world_materials(this.ptr);
 		return ret;
 	}
 	/**
@@ -125,8 +150,8 @@ export class World {
 	}
 	/**
 	 */
-	clear() {
-		wasm.world_clear(this.ptr);
+	reset() {
+		wasm.world_reset(this.ptr);
 	}
 	/**
 	 * @param {number} x

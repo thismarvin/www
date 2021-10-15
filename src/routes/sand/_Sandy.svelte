@@ -16,11 +16,12 @@
 
 	const width = 128;
 	const height = 128;
+	const chunkSize = 16;
 
 	let world: World | null = null;
-	let cellsPtr: number | null = null;
+	let materialsPtr: number | null = null;
 	let tintsPtr: number | null = null;
-	let cells: Uint8Array | null = null;
+	let materials: Uint8Array | null = null;
 	let tints: Uint8Array | null = null;
 
 	let parent: HTMLElement | null = null;
@@ -59,8 +60,8 @@
 		simulationPaused = !simulationPaused;
 	}
 
-	function clearWorld(): void {
-		world.clear();
+	function resetWorld(): void {
+		world.reset();
 		repaint = true;
 	}
 
@@ -190,7 +191,7 @@
 		for (let y = 0; y < height; ++y) {
 			for (let x = 0; x < width; ++x) {
 				const index = y * width + x;
-				const material = cells[index];
+				const material = materials[index];
 				const tint = tints[index];
 
 				ctx.fillStyle = getColor(material, tint);
@@ -239,10 +240,14 @@
 	onMount(async () => {
 		wasm = ((await init()) as unknown) as InitOutput;
 
-		world = World.with_size(width, height);
-		cellsPtr = world.data();
+		world = World.create(width, height, chunkSize);
+		materialsPtr = world.materials();
 		tintsPtr = world.tints();
-		cells = new Uint8Array(wasm.memory.buffer, cellsPtr, width * height);
+		materials = new Uint8Array(
+			wasm.memory.buffer,
+			materialsPtr,
+			width * height
+		);
 		tints = new Uint8Array(wasm.memory.buffer, tintsPtr, width * height);
 
 		parent = document.getElementById("parent");
@@ -309,7 +314,7 @@
 					>{simulationPaused ? "Resume" : "Pause"}</button
 				>
 			</li>
-			<li><button on:click={clearWorld}>Clear</button></li>
+			<li><button on:click={resetWorld}>Reset</button></li>
 		</ul>
 	</div>
 </div>
