@@ -32,8 +32,35 @@
 	let cellSize = 0;
 	let brushRadius = 4;
 
-	const noise = makeNoise2D(Date.now());
-	const tintNoiseStep = 0.05;
+	const noiseGenerator = makeNoise2D(Date.now());
+	const noiseArray: number[] = [];
+	const noiseZoom = 0.1;
+
+	for (let y = 0; y < height; ++y) {
+		for (let x = 0; x < width; ++x) {
+			noiseArray.push(noiseGenerator(x * noiseZoom, y * noiseZoom));
+		}
+	}
+
+	function noise(x: number, y: number): number {
+		let absX = Math.floor(Math.abs(x));
+		let absY = Math.floor(Math.abs(y));
+
+		let boundedX = absX % width;
+		let boundedY = absY % height;
+
+		if (Math.floor(absX / width) % 2 !== 0) {
+			boundedX = width - 1 - boundedX;
+		}
+
+		if (Math.floor(absY / height) % 2 !== 0) {
+			boundedY = height - 1 - boundedY;
+		}
+
+		return noiseArray[boundedY * width + boundedX];
+	}
+
+	const tintNoiseStep = 0.5;
 	let tintNoiseIndex = randomRange(-42, 42 + 1);
 	const waterNoiseStep = 0.1;
 	let waterNoiseIndex = 0;
@@ -120,14 +147,14 @@
 			case Material.Water: {
 				alpha =
 					Math.floor(
-						((1 + noise((x + waterNoiseIndex) / 15, y / 10)) / 2) * 100
+						((1 + noise((x + waterNoiseIndex) / 2, y / 1)) / 2) * 100
 					) + 155;
 
 				break;
 			}
 
 			case Material.Rock: {
-				alpha = Math.floor(((1 + noise(x / 4, y / 2)) / 2) * 55) + 200;
+				alpha = Math.floor(((1 + noise(x * 2, y / 1)) / 2) * 55) + 200;
 
 				break;
 			}
@@ -135,14 +162,14 @@
 			case Material.Smoke: {
 				alpha =
 					Math.floor(
-						((1 + noise((x + smokeNoiseIndex) / 5, y / 15)) / 2) * 200
+						((1 + noise((x + smokeNoiseIndex) / 1, y / 1)) / 2) * 200
 					) + 55;
 
 				break;
 			}
 
 			default: {
-				alpha = Math.floor(((1 + noise(x / 5, y / 5)) / 2) * 30) + 225;
+				alpha = Math.floor(((1 + noise(x * 3, y * 3)) / 2) * 35) + 220;
 
 				break;
 			}
