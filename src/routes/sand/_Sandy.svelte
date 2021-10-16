@@ -78,6 +78,7 @@
 	let currentMaterial = Material.Sand;
 
 	const smartPointer = new SmartPointer();
+	let startingPosition: number[] | null = null;
 
 	function setCurrentMaterial(material: number): void {
 		currentMaterial = material;
@@ -179,17 +180,27 @@
 	}
 
 	function update() {
+		if (startingPosition !== null) {
+			startingPosition = [smartPointer.x, smartPointer.y];
+		}
+
 		smartPointer.update();
 
+		if (smartPointer.pressed("LeftClick")) {
+			startingPosition = [smartPointer.x, smartPointer.y];
+		}
+
 		if (smartPointer.pressing("LeftClick")) {
-			const x1 = Math.floor(smartPointer.x / scale);
-			const y1 = Math.floor(smartPointer.y / scale);
+			const x1 = Math.floor(startingPosition[0] / scale);
+			const y1 = Math.floor(startingPosition[1] / scale);
+			const x2 = Math.floor(smartPointer.x / scale);
+			const y2 = Math.floor(smartPointer.y / scale);
 
 			world.paint(
 				x1,
 				y1,
-				x1,
-				y1,
+				x2,
+				y2,
 				brushRadius,
 				currentMaterial,
 				getTint(),
