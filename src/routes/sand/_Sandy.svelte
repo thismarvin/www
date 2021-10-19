@@ -2,6 +2,7 @@
 	import init, { Material, Tint, World } from "./_sand";
 	import { onMount } from "svelte";
 	import { makeNoise2D } from "open-simplex-noise";
+	import PaletteEntry from "./_PaletteEntry.svelte";
 	import SmartPointer from "$lib/pointer";
 
 	interface InitOutput {
@@ -70,7 +71,16 @@
 	const sandColors = ["#ffd5c3", "#ffcbba", "#f1b3b6", "#e7a5ab"];
 	const waterColors = ["#7094ff"];
 	const rockColors = ["#b884ff", "#a271ff", "#935bf2", "#7951e3"];
-	const smokeColors = ["#ebebeb"];
+	const smokeColors = ["#cbcbcb"];
+	const airColors = ["#ffffff"];
+
+	$: materialEntries = [
+		{ name: "Sand", type: Material.Sand, color: sandColors[0] },
+		{ name: "Water", type: Material.Water, color: waterColors[0] },
+		{ name: "Rock", type: Material.Rock, color: rockColors[0] },
+		{ name: "Smoke", type: Material.Smoke, color: smokeColors[0] },
+		{ name: "Air", type: Material.Air, color: airColors[0] },
+	];
 
 	let simulationPaused = true;
 	let repaint = false;
@@ -308,56 +318,59 @@
 </script>
 
 <div>
-	<div id="parent" class="canvas-wrapper">
-		<div class="canvas-container">
-			<canvas id="sandCanvas" />
+	<div class="canvas-wrapper-wrapper">
+		<div id="parent" class="canvas-wrapper">
+			<div class="canvas-container">
+				<canvas id="sandCanvas" />
+			</div>
 		</div>
 	</div>
-	<div>
+	<div class="palette centered">
 		<ul>
-			<li>
-				<button
-					class="material-picker"
-					on:click={() => setCurrentMaterial(Material.Sand)}>Sand</button
-				>
-			</li>
-			<li>
-				<button
-					class="material-picker"
-					on:click={() => setCurrentMaterial(Material.Water)}>Water</button
-				>
-			</li>
-			<li>
-				<button
-					class="material-picker"
-					on:click={() => setCurrentMaterial(Material.Rock)}>Rock</button
-				>
-			</li>
-			<li>
-				<button
-					class="material-picker"
-					on:click={() => setCurrentMaterial(Material.Smoke)}>Smoke</button
-				>
-			</li>
-			<li>
-				<button
-					class="material-picker"
-					on:click={() => setCurrentMaterial(Material.Air)}>Air</button
-				>
-			</li>
+			{#each materialEntries as entry}
+				<li>
+					<PaletteEntry
+						name={entry.name}
+						color={entry.color}
+						selected={currentMaterial === entry.type}
+						onclick={() => setCurrentMaterial(entry.type)}
+					/>
+				</li>
+			{/each}
 		</ul>
+	</div>
+	<div class="control-panel centered">
 		<ul>
 			<li>
-				<button on:click={toggleSimulation}
+				<button class="control" on:click={toggleSimulation}
 					>{simulationPaused ? "Resume" : "Pause"}</button
 				>
 			</li>
-			<li><button on:click={resetWorld}>Reset</button></li>
+			<li><button class="control" on:click={resetWorld}>Reset</button></li>
 		</ul>
 	</div>
 </div>
 
 <style lang="scss">
+	ul {
+		display: flex;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	li {
+		padding-right: 0.5rem;
+	}
+
+	li:last-child {
+		padding-right: 0;
+	}
+
+	.canvas-wrapper-wrapper {
+		border: 0.2rem solid black;
+	}
+
 	.canvas-wrapper {
 		position: relative;
 		padding-top: calc(1 / (1 / 1) * 100%);
@@ -370,5 +383,25 @@
 		width: 100%;
 		height: 100%;
 		box-shadow: var(--primary-box-shadow);
+	}
+
+	.control {
+		font-family: "Fira Sans", sans-serif;
+		font-size: min(3.5vw, 14px);
+		font-weight: 500;
+		margin: 0;
+		border: 0.2em solid var(--palette-light-gray);
+		padding: 1em 1.75em;
+		border-radius: 2em;
+		color: var(--secondary-text-color);
+		background-color: var(--palette-white);
+	}
+
+	.palette {
+		padding-top: 1rem;
+	}
+
+	.control-panel {
+		padding-top: 1rem;
 	}
 </style>

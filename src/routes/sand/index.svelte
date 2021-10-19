@@ -1,10 +1,14 @@
 <script lang="ts">
-	import ProjectFooter from "$lib/components/ProjectFooter.svelte";
 	import Sandy from "./_Sandy.svelte";
 </script>
 
 <svelte:head>
 	<title>Sand | thismarvin</title>
+	<style>
+		html {
+			overflow: hidden;
+		}
+	</style>
 </svelte:head>
 
 <main>
@@ -13,23 +17,15 @@
 	</section>
 </main>
 
-<ProjectFooter
-	title="Sand"
-	references={[
-		{
-			title: `"Exploring the Tech and Design of Noita." GDC`,
-			source: "YouTube",
-			href: "https://youtu.be/prXuyMCgbTc",
-		},
-		{
-			title: "View source code",
-			href: "https://github.com/thismarvin/www/tree/dev/src/routes/sand",
-		},
-	]}
-/>
-
 <style lang="scss">
+	main {
+		display: flex;
+		height: 100%;
+	}
+
 	section {
+		margin: auto;
 		padding: 2rem 1rem;
+		width: 100%;
 	}
 </style>
