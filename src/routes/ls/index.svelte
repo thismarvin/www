@@ -97,7 +97,9 @@
 
 <main>
 	<section>
-		<RepeatRepeatRepeat phrase={"projects."} />
+		<div id="repeat-wrapper">
+			<RepeatRepeatRepeat phrase={"projects."} />
+		</div>
 		<h4>Featured Project</h4>
 		<ul class="featured">
 			<li>
@@ -147,10 +149,28 @@
 </main>
 
 <style lang="scss">
+	@import "../../mixins.scss";
+
+	main {
+		margin: auto;
+		max-width: calc(800px - 4px);
+
+		@include medium {
+			border-left: 2px dotted var(--palette-light-gray);
+			border-right: 2px dotted var(--palette-light-gray);
+		}
+	}
+
 	section {
+		margin: auto;
 		padding: 2rem;
 		padding-bottom: calc(2rem + var(--nav-height));
 		width: calc(100% - 4rem);
+		max-width: 350px;
+
+		@include medium {
+			padding: 4rem 2rem;
+		}
 	}
 
 	ul {
@@ -197,6 +217,10 @@
 
 	.flip {
 		transform: rotateZ(180deg);
+	}
+
+	#repeat-wrapper {
+		padding: 2rem 0;
 	}
 
 	#sorter {

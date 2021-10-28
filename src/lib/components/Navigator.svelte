@@ -27,16 +27,18 @@
 
 <div id="navigator">
 	{#if showNav}
-		<nav>
-			<h4><a href="https://bit.ly/IqT6zt">thismarvin</a></h4>
-			<ul>
-				{#each navElements as element}
-					<li>
-						<a href={element.href} on:click={toggleNav}>{element.name}</a>
-					</li>
-				{/each}
-			</ul>
-		</nav>
+		<div id="nav-wrapper">
+			<nav>
+				<h4><a href="https://bit.ly/IqT6zt">thismarvin</a></h4>
+				<ul>
+					{#each navElements as element}
+						<li>
+							<a href={element.href} on:click={toggleNav}>{element.name}</a>
+						</li>
+					{/each}
+				</ul>
+			</nav>
+		</div>
 	{/if}
 
 	<div id="menu">
@@ -53,6 +55,8 @@
 </div>
 
 <style lang="scss">
+	@import "../../mixins.scss";
+
 	ul {
 		margin: 0;
 		padding: 0;
@@ -96,30 +100,50 @@
 	}
 
 	nav {
+		width: 100%;
 		background-color: var(--palette-white);
 		padding: 2rem;
-		margin-bottom: 1rem;
 		border-radius: 1rem;
 		box-shadow: 0 0 1rem rgba(#000000, 0.2);
 		pointer-events: all;
+
+		@include medium {
+			max-width: 35vmin;
+		}
+	}
+
+	#nav-wrapper {
+		display: flex;
+		justify-content: flex-end;
+		padding: 1rem;
+		padding-bottom: 0;
+
+		@include medium {
+			padding: 2rem;
+			padding-bottom: 0;
+		}
 	}
 
 	#navigator {
-		display: flex;
-		flex-direction: column;
 		position: fixed;
 		z-index: 1;
 		bottom: 0;
 		overflow: hidden;
-		padding: 1rem 1rem 2rem 1rem;
-		width: calc(100% - 2rem);
 		pointer-events: none;
+		width: 100%;
 	}
 
 	#menu {
 		display: flex;
 		justify-content: flex-end;
 		height: 3rem;
+		padding: 1rem;
+		padding-bottom: 2rem;
+
+		@include medium {
+			padding: 2rem;
+			padding-top: 1rem;
+		}
 	}
 
 	.hamburger {

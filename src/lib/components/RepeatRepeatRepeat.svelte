@@ -38,8 +38,10 @@
 	}
 
 	#wrapper {
+		margin: auto;
 		position: relative;
 		padding-top: calc(1 / (1 / 1) * 100%);
+		max-width: 350px;
 	}
 
 	#container {

@@ -64,10 +64,7 @@
 
 	#display {
 		margin: auto;
-
-		@include medium {
-			max-width: calc(75vmin);
-		}
+		max-width: 800px;
 	}
 
 	#canvas-wrapper {
