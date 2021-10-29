@@ -18,14 +18,29 @@
 </main>
 
 <style lang="scss">
+	@import "../../mixins.scss";
+
 	main {
 		display: flex;
-		height: 100%;
+		margin: auto;
+		max-width: calc(800px - 4px);
+		min-height: 100vh;
+
+		@include medium {
+			border-left: 2px dotted var(--palette-light-gray);
+			border-right: 2px dotted var(--palette-light-gray);
+		}
 	}
 
 	section {
 		margin: auto;
-		padding: 2rem 1rem;
-		width: 100%;
+		padding: 1rem;
+		width: calc(100vw - 2rem);
+		max-width: calc(700px - 2rem);
+
+		@include medium {
+			padding: 2rem;
+			max-width: calc(700px - 4rem);
+		}
 	}
 </style>

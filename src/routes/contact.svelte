@@ -31,8 +31,8 @@
 
 	main {
 		margin: auto;
-		height: 100%;
 		max-width: calc(800px - 4px);
+		min-height: 100vh;
 
 		@include medium {
 			border-left: 2px dotted var(--palette-light-gray);
@@ -49,6 +49,7 @@
 
 		@include medium {
 			padding: 4rem 2rem;
+			padding-bottom: calc(2rem + var(--nav-height));
 		}
 	}
 

@@ -100,16 +100,13 @@
 	}
 
 	nav {
+		pointer-events: all;
 		width: 100%;
-		background-color: var(--palette-white);
+		max-width: 350px;
 		padding: 2rem;
 		border-radius: 1rem;
+		background-color: var(--palette-white);
 		box-shadow: 0 0 1rem rgba(#000000, 0.2);
-		pointer-events: all;
-
-		@include medium {
-			max-width: 35vmin;
-		}
 	}
 
 	#nav-wrapper {

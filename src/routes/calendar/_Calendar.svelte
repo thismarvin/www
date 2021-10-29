@@ -60,13 +60,13 @@
 	onMount(() => loop(0));
 </script>
 
-<div>
-	<div class="calendar-metadata">
+<div class="calendar">
+	<div class="metadata">
 		<h4>{dateString}</h4>
 		<h4>{rolling} week{Math.abs(rolling) === 1 ? "" : "s"}</h4>
 	</div>
-	<div class="calendar-wrapper">
-		<div class="calendar">
+	<div class="grid-wrapper">
+		<div class="grid">
 			{#each Array(lifeExpectancy) as _, y}
 				<div class="year">
 					{#each Array(52) as _, x}
@@ -85,18 +85,22 @@
 		margin: 1rem 0;
 	}
 
-	.calendar-metadata {
+	.calendar {
+		max-width: calc(10px * 52 + 1px + 4px);
+	}
+
+	.metadata {
 		display: flex;
 		justify-content: space-between;
 	}
 
-	.calendar-wrapper {
+	.grid-wrapper {
 		border: 2px solid var(--palette-black);
 		box-shadow: var(--secondary-box-shadow);
 	}
 
-	.calendar {
-		--size: calc((100vw - 2rem - 4px - 53px) / 52);
+	.grid {
+		--size: min(calc((100vw - 2rem - 4px - 53px) / 52), 9px);
 		border-left: 1px solid var(--palette-light-gray);
 		border-top: 1px solid var(--palette-light-gray);
 	}

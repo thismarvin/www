@@ -170,6 +170,7 @@
 
 		@include medium {
 			padding: 4rem 2rem;
+			padding-bottom: calc(2rem + var(--nav-height));
 		}
 	}
 

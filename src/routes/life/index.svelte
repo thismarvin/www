@@ -8,7 +8,7 @@
 </svelte:head>
 
 <main>
-	<section>
+	<section class="centered">
 		<World />
 	</section>
 </main>
@@ -34,7 +34,19 @@
 />
 
 <style lang="scss">
+	@import "../../mixins.scss";
+
+	main {
+		margin: auto;
+		max-width: calc(800px - 4px);
+
+		@include medium {
+			border-left: 2px dotted var(--palette-light-gray);
+			border-right: 2px dotted var(--palette-light-gray);
+		}
+	}
+
 	section {
-		padding: 4rem 1rem;
+		padding: 5rem 1rem;
 	}
 </style>

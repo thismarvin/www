@@ -239,13 +239,18 @@
 		background-color: var(--palette-white);
 	}
 
+	.world {
+		max-width: 600px;
+	}
+
 	.grid-wrapper {
 		padding: 0.5rem;
 		background-color: var(--palette-black);
 	}
 
 	.grid {
-		--size: min(calc((100vw - 2rem - 1rem - 2px * 16) / 15), 30px);
+		--max-size: calc((600px - 1rem - 2px * 16) / 15);
+		--size: min(calc((100vw - 2rem - 1rem - 2px * 16) / 15), var(--max-size));
 		border-top: 2px solid var(--palette-light-gray);
 		border-left: 2px solid var(--palette-light-gray);
 		box-shadow: 1rem 1rem 1rem rgba(#000000, 0.2);

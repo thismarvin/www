@@ -46,7 +46,7 @@
 </svelte:head>
 
 <main>
-	<section>
+	<section class="centered">
 		{#if !validDate}
 			<form action="">
 				<div id="date-wrapper">
@@ -85,17 +85,31 @@
 />
 
 <style lang="scss">
+	@import "../../mixins.scss";
+
+	main {
+		margin: auto;
+		max-width: calc(800px - 4px);
+
+		@include medium {
+			border-left: 2px dotted var(--palette-light-gray);
+			border-right: 2px dotted var(--palette-light-gray);
+		}
+	}
+
 	section {
-		padding: 1rem;
+		padding: 3rem 1rem;
 	}
 
 	form {
 		display: flex;
 		flex-direction: column;
+		margin: 4rem 0;
 		padding: 4rem 2rem 2rem 2rem;
-		margin: 1rem;
 		border-radius: 0.5rem;
 		box-shadow: var(--secondary-box-shadow);
+		width: 100%;
+		max-width: 350px;
 	}
 
 	label {

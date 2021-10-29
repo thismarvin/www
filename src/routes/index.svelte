@@ -21,14 +21,12 @@
 
 <main>
 	<section>
-		<div id="display">
-			<div id="canvas-wrapper">
-				<div id="canvas-container" />
-			</div>
-			<div id="description">
-				<h4>{date}</h4>
-				<button on:click={() => art.anew()}>marvin</button>
-			</div>
+		<div id="canvas-wrapper">
+			<div id="canvas-container" />
+		</div>
+		<div id="description">
+			<h4>{date}</h4>
+			<button on:click={() => art.anew()}>marvin</button>
 		</div>
 	</section>
 </main>
@@ -38,13 +36,26 @@
 
 	main {
 		display: flex;
-		height: 100%;
+		margin: auto;
+		max-width: calc(800px - 4px);
+		min-height: 100vh;
+
+		@include medium {
+			border-left: 2px dotted var(--palette-light-gray);
+			border-right: 2px dotted var(--palette-light-gray);
+		}
 	}
 
 	section {
 		margin: auto;
 		padding: 1rem;
-		width: 100%;
+		width: calc(100vw - 2rem);
+		max-width: calc(800px - 2rem);
+
+		@include medium {
+			padding: 2rem;
+			max-width: calc(800px - 4rem);
+		}
 	}
 
 	h4 {
@@ -60,11 +71,6 @@
 		padding: 0;
 		color: var(--primary-text-color);
 		background-color: transparent;
-	}
-
-	#display {
-		margin: auto;
-		max-width: 800px;
 	}
 
 	#canvas-wrapper {

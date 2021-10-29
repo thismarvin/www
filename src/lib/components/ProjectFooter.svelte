@@ -10,26 +10,30 @@
 </script>
 
 <footer>
-	<h4>{title}</h4>
-	<h5>Learn More</h5>
-	<ul>
-		{#each references as reference}
-			<li>
-				<a href={reference.href}
-					>{reference.title}
-					{#if reference.source !== undefined}
-						<span class="italic">{reference.source}</span>
-					{/if}
-				</a>
-			</li>
-		{/each}
-	</ul>
+	<div id="wrapper">
+		<div id="container">
+			<h4>{title}</h4>
+			<h5>Learn More</h5>
+			<ul>
+				{#each references as reference}
+					<li>
+						<a href={reference.href}
+							>{reference.title}
+							{#if reference.source !== undefined}
+								<span class="italic">{reference.source}</span>
+							{/if}
+						</a>
+					</li>
+				{/each}
+			</ul>
+		</div>
+	</div>
 </footer>
 
 <style lang="scss">
+	@import "../../mixins.scss";
+
 	footer {
-		padding: 4rem 2rem;
-		padding-bottom: calc(4rem + var(--nav-height));
 		background-color: var(--palette-almost-white);
 	}
 
@@ -62,5 +66,20 @@
 		padding: 0.5rem 0;
 		width: 100%;
 		color: var(--secondary-text-color);
+	}
+
+	#wrapper {
+		margin: auto;
+		max-width: calc(800px - 4px);
+
+		@include medium {
+			border-left: 2px dotted var(--palette-light-gray);
+			border-right: 2px dotted var(--palette-light-gray);
+		}
+	}
+
+	#container {
+		padding: 4rem 2rem;
+		padding-bottom: calc(4rem + var(--nav-height));
 	}
 </style>
