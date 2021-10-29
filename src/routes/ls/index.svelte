@@ -35,8 +35,8 @@
 	const projects: Project[] = [
 		createProject("Life", "/life", "2021-08-25"),
 		createProject("Calendar", "/calendar", "2021-09-21"),
-		createProject("Sand", "/sand", "2021-10"),
-		createProject("Chess", "/chess", "2021-10"),
+		createProject("Sand", "/sand", "2021-10-01"),
+		createProject("Chess", "/chess", "2021-10-28"),
 	];
 
 	const projectsSortedByName = projects.slice().sort(sortByName);
@@ -88,7 +88,7 @@
 
 	let renderedProjects = updateProjects();
 
-	const featured = 0;
+	const featured = 2;
 </script>
 
 <svelte:head>
