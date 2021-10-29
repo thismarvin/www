@@ -12,6 +12,7 @@
 		"prepare": "husky install"
 	},
 	"devDependencies": {
+		"@sveltejs/adapter-netlify": "^1.0.0-next.35",
 		"@sveltejs/kit": "next",
 		"@types/p5": "^1.3.0",
 		"@typescript-eslint/eslint-plugin": "^4.19.0",
