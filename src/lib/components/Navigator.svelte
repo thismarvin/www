@@ -1,6 +1,6 @@
 <script lang="ts">
 	let showNav = false;
-	$: buttonImage = showNav ? "./close.svg" : "./hamburger.svg";
+	$: buttonImage = showNav ? "/close.svg" : "/hamburger.svg";
 
 	type NavElement = {
 		name: string;

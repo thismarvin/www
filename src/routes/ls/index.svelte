@@ -201,7 +201,7 @@
 		width: 0.8rem;
 		height: calc(0.8 * 13 / 30 * 1rem);
 		transform: rotateZ(0deg);
-		background-image: url("./triangle.svg");
+		background-image: url("/triangle.svg");
 		background-color: transparent;
 		background-size: contain;
 		background-repeat: no-repeat;
