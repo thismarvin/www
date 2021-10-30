@@ -1,15 +1,15 @@
 <script lang="ts">
-	import Art from "$lib/art";
-	import { create } from "$lib/p5app";
+	// import Art from "$lib/art";
+	// import { create } from "$lib/p5app";
 	import { onMount } from "svelte";
 
-	let art: Art;
+	// let art: Art;
 
 	// (•◡•)
 	// (◕‿◕✿)
 	onMount(() => {
-		art = new Art(document.querySelector("#canvas-container"));
-		create(art);
+		// art = new Art(document.querySelector("#canvas-container"));
+		// create(art);
 	});
 
 	const date = new Date().toISOString().substring(0, 10);
@@ -22,11 +22,17 @@
 <main>
 	<section>
 		<div id="canvas-wrapper">
-			<div id="canvas-container" />
+			<div id="canvas-container" class="centered">
+				<div>
+					<h4>if you can see this then i messed up</h4>
+					<h4>(っ˘̩╭╮˘̩)っ</h4>
+				</div>
+			</div>
 		</div>
 		<div id="description">
 			<h4>{date}</h4>
-			<button on:click={() => art.anew()}>marvin</button>
+			<!-- <button on:click={() => art.anew()}>marvin</button> -->
+			<button>marvin</button>
 		</div>
 	</section>
 </main>
