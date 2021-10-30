@@ -1,7 +1,8 @@
 <script context="module" lang="ts">
-	import { svelteSafeInit, InitOutput } from "./sand";
+	import type { InitOutput } from "./sand";
 	import wasmURL from "./sand_bg.wasm?url";
 	import { browser } from "$app/env";
+	import { svelteSafeInit } from "./sand";
 
 	let wasm: InitOutput;
 

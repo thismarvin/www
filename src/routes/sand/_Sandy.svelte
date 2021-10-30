@@ -1,7 +1,8 @@
 <script lang="ts">
 	import PaletteEntry from "./_PaletteEntry.svelte";
 	import SmartPointer from "$lib/pointer";
-	import { InitOutput, Material, Tint, World } from "./sand";
+	import type { InitOutput } from "./sand";
+	import { Material, Tint, World } from "./sand";
 	import { browser } from "$app/env";
 	import { makeNoise2D } from "open-simplex-noise";
 	import { onDestroy, onMount } from "svelte";
