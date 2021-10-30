@@ -1,3 +1,36 @@
+<script context="module" lang="ts">
+	import { svelteSafeInit, InitOutput } from "./sand";
+	import wasmURL from "./sand_bg.wasm?url";
+	import { browser } from "$app/env";
+
+	let wasm: InitOutput;
+
+	type LoadInput = {
+		fetch?: unknown;
+	};
+
+	type LoadOutput = {
+		status?: number;
+		error?: Error;
+	};
+
+	export async function load(input: LoadInput): Promise<LoadOutput> {
+		const url = (() => {
+			if (!browser) {
+				return "http://localhost:3000" + wasmURL;
+			}
+
+			return wasmURL;
+		})();
+
+		wasm = await svelteSafeInit(input.fetch, url);
+
+		return {
+			status: 200,
+		};
+	}
+</script>
+
 <script lang="ts">
 	import Sandy from "./_Sandy.svelte";
 </script>
@@ -13,7 +46,7 @@
 
 <main>
 	<section>
-		<Sandy />
+		<Sandy {wasm} />
 	</section>
 </main>
 

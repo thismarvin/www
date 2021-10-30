@@ -1,29 +1,25 @@
 <script lang="ts">
-	import init, { Material, Tint, World } from "./_sand";
-	import { onMount } from "svelte";
-	import { makeNoise2D } from "open-simplex-noise";
 	import PaletteEntry from "./_PaletteEntry.svelte";
 	import SmartPointer from "$lib/pointer";
+	import { InitOutput, Material, Tint, World } from "./sand";
+	import { makeNoise2D } from "open-simplex-noise";
+	import { onMount } from "svelte";
 
-	interface InitOutput {
-		readonly memory: WebAssembly.Memory;
-	}
-
-	function randomRange(min: number, max: number): number {
-		return min + Math.floor(Math.random() * (max - min));
-	}
-
-	let wasm: InitOutput | null = null;
+	export let wasm: InitOutput;
 
 	const width = 128;
 	const height = 128;
 	const chunkSize = 16;
 
-	let world: World | null = null;
-	let materialsPtr: number | null = null;
-	let tintsPtr: number | null = null;
-	let materials: Uint8Array | null = null;
-	let tints: Uint8Array | null = null;
+	let world = World.create(width, height, chunkSize);
+	let materialsPtr = world.materials();
+	let tintsPtr = world.tints();
+	let materials = new Uint8Array(
+		wasm.memory.buffer,
+		materialsPtr,
+		width * height
+	);
+	let tints = new Uint8Array(wasm.memory.buffer, tintsPtr, width * height);
 
 	let parent: HTMLElement | null = null;
 	let canvas: HTMLCanvasElement | null = null;
@@ -41,6 +37,10 @@
 		for (let x = 0; x < width; ++x) {
 			noiseArray.push(noiseGenerator(x * noiseZoom, y * noiseZoom));
 		}
+	}
+
+	function randomRange(min: number, max: number): number {
+		return min + Math.floor(Math.random() * (max - min));
 	}
 
 	function noise(x: number, y: number): number {
@@ -286,18 +286,6 @@
 	}
 
 	onMount(async () => {
-		wasm = ((await init()) as unknown) as InitOutput;
-
-		world = World.create(width, height, chunkSize);
-		materialsPtr = world.materials();
-		tintsPtr = world.tints();
-		materials = new Uint8Array(
-			wasm.memory.buffer,
-			materialsPtr,
-			width * height
-		);
-		tints = new Uint8Array(wasm.memory.buffer, tintsPtr, width * height);
-
 		parent = document.getElementById("parent");
 		canvas = document.getElementById("sandCanvas") as HTMLCanvasElement;
 
@@ -338,6 +326,9 @@
 				</li>
 			{/each}
 		</ul>
+	</div>
+	<div>
+		<!-- TODO(thismarvin): Brush Picker -->
 	</div>
 	<div class="control-panel centered">
 		<ul>
