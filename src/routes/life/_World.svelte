@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { browser } from "$app/env";
+	import { onDestroy, onMount } from "svelte";
 
 	enum CellType {
 		None = 0,
@@ -148,6 +149,7 @@
 
 	let totalElapsedTime = 0;
 	let accumulator = 0;
+	let requestHandle: number | null = null;
 
 	function loop(timeStamp: number) {
 		let deltaTime = (timeStamp - totalElapsedTime) / 1000;
@@ -170,10 +172,18 @@
 			accumulator -= target;
 		}
 
-		requestAnimationFrame((timeStamp) => loop(timeStamp));
+		if (browser) {
+			requestHandle = requestAnimationFrame((timeStamp) => loop(timeStamp));
+		}
 	}
 
 	onMount(() => loop(0));
+
+	onDestroy(() => {
+		if (browser) {
+			cancelAnimationFrame(requestHandle);
+		}
+	});
 </script>
 
 <div class="world">

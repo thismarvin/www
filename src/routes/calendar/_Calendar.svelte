@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { browser } from "$app/env";
+	import { onDestroy, onMount } from "svelte";
 
 	export let lifeExpectancy = 79;
 	export let dob = "2000-03-17";
@@ -24,6 +25,7 @@
 
 	let totalElapsedTime = 0;
 	let accumulator = 0;
+	let requestHandle: number | null = null;
 
 	function update() {
 		rolling = rolling < totalWeeks ? rolling + 1 : totalWeeks;
@@ -54,10 +56,18 @@
 			return;
 		}
 
-		requestAnimationFrame((timeStamp) => loop(timeStamp));
+		if (browser) {
+			requestHandle = requestAnimationFrame((timeStamp) => loop(timeStamp));
+		}
 	}
 
 	onMount(() => loop(0));
+
+	onDestroy(() => {
+		if (browser) {
+			cancelAnimationFrame(requestHandle);
+		}
+	});
 </script>
 
 <div class="calendar">

@@ -2,8 +2,9 @@
 	import PaletteEntry from "./_PaletteEntry.svelte";
 	import SmartPointer from "$lib/pointer";
 	import { InitOutput, Material, Tint, World } from "./sand";
+	import { browser } from "$app/env";
 	import { makeNoise2D } from "open-simplex-noise";
-	import { onMount } from "svelte";
+	import { onDestroy, onMount } from "svelte";
 
 	export let wasm: InitOutput;
 
@@ -24,6 +25,7 @@
 	let parent: HTMLElement | null = null;
 	let canvas: HTMLCanvasElement | null = null;
 	let ctx: CanvasRenderingContext2D | null = null;
+	let requestHandle: number | null = null;
 
 	let scale = 1;
 	let cellSize = 0;
@@ -282,10 +284,12 @@
 
 		draw();
 
-		requestAnimationFrame((timeStamp) => loop(timeStamp));
+		if (browser) {
+			requestHandle = requestAnimationFrame((timeStamp) => loop(timeStamp));
+		}
 	}
 
-	onMount(async () => {
+	onMount(() => {
 		parent = document.getElementById("parent");
 		canvas = document.getElementById("sandCanvas") as HTMLCanvasElement;
 
@@ -302,6 +306,12 @@
 		cellSize = canvas.width / width;
 
 		loop(0);
+	});
+
+	onDestroy(() => {
+		if (browser) {
+			cancelAnimationFrame(requestHandle);
+		}
 	});
 </script>
 
