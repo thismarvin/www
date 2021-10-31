@@ -135,11 +135,6 @@ export interface InitOutput {
 	readonly world_simulate: (a: number) => void;
 }
 
-export function svelteSafeInit(
-	fetch: unknown,
-	url: string
-): Promise<InitOutput>;
-
 /**
  * If `module_or_path` is {RequestInfo} or {URL}, makes a request and
  * for everything else, calls `WebAssembly.instantiate` directly.

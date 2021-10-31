@@ -240,21 +240,4 @@ async function init(input) {
 	return wasm;
 }
 
-export async function svelteSafeInit(fetch, url) {
-	const imports = {};
-	imports.wbg = {};
-	imports.wbg.__wbindgen_throw = function (arg0, arg1) {
-		throw new Error(getStringFromWasm0(arg0, arg1));
-	};
-
-	const input = fetch(url);
-
-	const { instance, module } = await load(await input, imports);
-
-	wasm = instance.exports;
-	init.__wbindgen_wasm_module = module;
-
-	return wasm;
-}
-
 export default init;
