@@ -15,7 +15,7 @@
 </main>
 
 <ProjectFooter
-	title="Life"
+	title="Chess"
 	references={[
 		{
 			title: `"Getting Started."`,
