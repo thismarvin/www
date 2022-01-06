@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Board from "./_Board.svelte";
 	import ProjectFooter from "$lib/components/ProjectFooter.svelte";
+	import init from "./chess";
+	import wasmURL from "./chess_bg.wasm?url";
 </script>
 
 <svelte:head>
@@ -10,7 +12,11 @@
 	<section class="centered">
 		<h4>This project is still a work in progress!</h4>
 		<p>I am trying my hardest; please come back later.</p>
-		<Board />
+		{#await fetch(wasmURL) then input}
+			{#await init(input) then _}
+				<Board />
+			{/await}
+		{/await}
 	</section>
 </main>
 
