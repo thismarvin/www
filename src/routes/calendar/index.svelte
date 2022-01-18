@@ -10,7 +10,7 @@
 	let validDate = false;
 	let parseError = "";
 
-	$: dob = $page.query.get("dob");
+	$: dob = $page.url.searchParams.get("dob");
 	$: receivedQuery = dob !== null;
 
 	$: if (receivedQuery) {
