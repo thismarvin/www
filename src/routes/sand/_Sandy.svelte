@@ -291,9 +291,6 @@
 	}
 
 	onMount(() => {
-		parent = document.getElementById("parent");
-		canvas = document.getElementById("sandCanvas") as HTMLCanvasElement;
-
 		canvas.width = parent.clientWidth * 2;
 		canvas.height = parent.clientHeight * 2;
 		canvas.style.width = `${parent.clientWidth}px`;
@@ -318,9 +315,9 @@
 
 <div>
 	<div class="canvas-wrapper-wrapper">
-		<div id="parent" class="canvas-wrapper">
+		<div bind:this={parent} id="parent" class="canvas-wrapper">
 			<div class="canvas-container">
-				<canvas id="sandCanvas" />
+				<canvas bind:this={canvas} id="sandCanvas" />
 			</div>
 		</div>
 	</div>
