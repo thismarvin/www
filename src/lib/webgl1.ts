@@ -1,3 +1,5 @@
+export type RenderingContext = WebGLRenderingContext | WebGL2RenderingContext;
+
 export enum AttributeType {
 	Byte = 5120,
 	UnsignedByte = 5121,
@@ -56,7 +58,7 @@ export enum DrawMode {
 }
 
 export function createProgram(
-	gl: WebGLRenderingContext,
+	gl: RenderingContext,
 	vertexShaderSource: string,
 	fragmentShaderSource: string
 ): WebGLProgram {
@@ -71,7 +73,7 @@ export function createProgram(
 }
 
 export function allocateVertexBuffer(
-	gl: WebGLRenderingContext,
+	gl: RenderingContext,
 	byteLength: number,
 	usage: VertexUsage
 ): WebGLBuffer {
@@ -79,7 +81,7 @@ export function allocateVertexBuffer(
 }
 
 export function setVertexBufferData(
-	gl: WebGLRenderingContext,
+	gl: RenderingContext,
 	buffer: WebGLBuffer,
 	data: BufferSource
 ): void {
@@ -87,7 +89,7 @@ export function setVertexBufferData(
 }
 
 export function allocateIndexBuffer(
-	gl: WebGLRenderingContext,
+	gl: RenderingContext,
 	byteLength: number,
 	usage: VertexUsage
 ): WebGLBuffer {
@@ -95,7 +97,7 @@ export function allocateIndexBuffer(
 }
 
 export function setIndexBufferData(
-	gl: WebGLRenderingContext,
+	gl: RenderingContext,
 	buffer: WebGLBuffer,
 	data: BufferSource
 ): void {
@@ -103,7 +105,7 @@ export function setIndexBufferData(
 }
 
 function _allocateBuffer(
-	gl: WebGLRenderingContext,
+	gl: RenderingContext,
 	bufferUsage: BufferUsage,
 	byteLength: number,
 	vertexUsage: VertexUsage
@@ -121,7 +123,7 @@ function _allocateBuffer(
 }
 
 function _setBufferData(
-	gl: WebGLRenderingContext,
+	gl: RenderingContext,
 	usage: BufferUsage,
 	buffer: WebGLBuffer,
 	data: BufferSource
@@ -131,7 +133,7 @@ function _setBufferData(
 }
 
 function _createShader(
-	gl: WebGLRenderingContext,
+	gl: RenderingContext,
 	type: ShaderType,
 	source: string
 ): WebGLShader {
@@ -158,7 +160,7 @@ function _createShader(
 }
 
 function _createProgram(
-	gl: WebGLRenderingContext,
+	gl: RenderingContext,
 	vertexShader: WebGLShader,
 	fragmentShader: WebGLShader
 ): WebGLProgram {
