@@ -1,5 +1,7 @@
 <script lang="ts">
+	import Color from "$lib/color";
 	import PaletteEntry from "./_PaletteEntry.svelte";
+	import Pixels from "$lib/pickles";
 	import SmartPointer from "$lib/pointer";
 	import type { InitOutput } from "./sand";
 	import { Material, Tint, World } from "./sand";
@@ -25,11 +27,11 @@
 
 	let parent: HTMLElement | null = null;
 	let canvas: HTMLCanvasElement | null = null;
-	let ctx: CanvasRenderingContext2D | null = null;
 	let requestHandle: number | null = null;
 
+	let pixels: Pixels;
+
 	let scale = 1;
-	let cellSize = 0;
 	let brushRadius = 4;
 
 	const noiseGenerator = makeNoise2D(Date.now());
@@ -76,6 +78,22 @@
 	const rockColors = ["#b884ff", "#a271ff", "#935bf2", "#7951e3"];
 	const smokeColors = ["#cbcbcb"];
 	const airColors = ["#ffffff"];
+
+	$: sandColorsHex = [
+		Color.fromHexString(sandColors[0]),
+		Color.fromHexString(sandColors[1]),
+		Color.fromHexString(sandColors[2]),
+		Color.fromHexString(sandColors[3]),
+	];
+	$: waterColorsHex = [Color.fromHexString(waterColors[0])];
+	$: rockColorsHex = [
+		Color.fromHexString(rockColors[0]),
+		Color.fromHexString(rockColors[1]),
+		Color.fromHexString(rockColors[2]),
+		Color.fromHexString(rockColors[3]),
+	];
+	$: smokeColorsHex = [Color.fromHexString(smokeColors[0])];
+	$: airColorsHex = [Color.fromHexString(airColors[0])];
 
 	$: materialEntries = [
 		{ name: "Sand", type: Material.Sand, color: sandColors[0] },
@@ -134,62 +152,59 @@
 		}
 	}
 
-	function getColor(material: number, tint: number): string {
+	function getColor(material: number, tint: number): Color {
 		switch (material) {
 			case Material.Sand: {
-				return sandColors[tint];
+				return sandColorsHex[tint];
 			}
 			case Material.Water: {
-				return waterColors[0];
+				return waterColorsHex[0];
 			}
 			case Material.Rock: {
-				return rockColors[tint];
+				return rockColorsHex[tint];
 			}
 			case Material.Smoke: {
-				return smokeColors[0];
+				return smokeColorsHex[0];
+			}
+			case Material.Air: {
+				return airColorsHex[0];
 			}
 			default: {
-				return "#ffffff";
+				return Color.default();
 			}
 		}
 	}
 
-	function getAlpha(material: number, x: number, y: number): string {
-		let alpha = 255;
-
+	function getAlpha(material: number, x: number, y: number): number {
 		switch (material) {
+			case Material.Sand: {
+				return 1;
+			}
 			case Material.Water: {
-				alpha =
+				const alpha =
 					Math.floor(
 						((1 + noise((x + waterNoiseIndex) / 2, y / 1)) / 2) * 100
 					) + 155;
 
-				break;
+				return alpha / 255;
 			}
-
 			case Material.Rock: {
-				alpha = Math.floor(((1 + noise(x * 2, y / 1)) / 2) * 55) + 200;
-
-				break;
+				return 1;
 			}
-
 			case Material.Smoke: {
-				alpha =
+				const alpha =
 					Math.floor(
 						((1 + noise((x + smokeNoiseIndex) / 1, y / 1)) / 2) * 200
 					) + 55;
 
-				break;
+				return alpha / 255;
 			}
-
-			default: {
-				alpha = Math.floor(((1 + noise(x * 3, y * 3)) / 2) * 35) + 220;
-
-				break;
+			case Material.Air: {
+				return 1;
 			}
+			default:
+				return 1;
 		}
-
-		return alpha.toString(16);
 	}
 
 	function update() {
@@ -234,23 +249,24 @@
 			return;
 		}
 
-		ctx.fillStyle = "#ffffff";
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-		const size = Math.ceil(cellSize);
-
 		for (let y = 0; y < height; ++y) {
 			for (let x = 0; x < width; ++x) {
 				const index = y * width + x;
 				const material = materials[index];
 				const tint = tints[index];
 
-				ctx.fillStyle = getColor(material, tint);
-				ctx.fillStyle += getAlpha(material, x, y);
+				let color = getColor(material, tint);
+				let alpha = getAlpha(material, x, y);
 
-				ctx.fillRect(x * cellSize, y * cellSize, size, size);
+				if (alpha != 1) {
+					color = Color.multiply(color, alpha);
+				}
+
+				pixels.set(x, y, color);
 			}
 		}
+
+		pixels.draw();
 
 		repaint = false;
 	}
@@ -296,12 +312,11 @@
 		canvas.style.width = `${parent.clientWidth}px`;
 		canvas.style.height = `${parent.clientHeight}px`;
 
-		ctx = canvas.getContext("2d");
-
 		smartPointer.attachElement(parent);
 
 		scale = parseInt(canvas.style.width) / width;
-		cellSize = canvas.width / width;
+
+		pixels = new Pixels(canvas, width, height);
 
 		loop(0);
 	});
