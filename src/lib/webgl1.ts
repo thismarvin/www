@@ -104,6 +104,37 @@ export function setIndexBufferData(
 	_setBufferData(gl, BufferUsage.Index, buffer, data);
 }
 
+export function createBufferInit(
+	gl: RenderingContext,
+	usage: BufferUsage,
+	contents: BufferSource
+): WebGLBuffer {
+	switch (usage) {
+		case BufferUsage.Vertex: {
+			const buffer = allocateVertexBuffer(
+				gl,
+				contents.byteLength,
+				VertexUsage.Static
+			);
+
+			setVertexBufferData(gl, buffer, contents);
+
+			return buffer;
+		}
+		case BufferUsage.Index: {
+			const buffer = allocateIndexBuffer(
+				gl,
+				contents.byteLength,
+				VertexUsage.Static
+			);
+
+			setIndexBufferData(gl, buffer, contents);
+
+			return buffer;
+		}
+	}
+}
+
 function _allocateBuffer(
 	gl: RenderingContext,
 	bufferUsage: BufferUsage,
