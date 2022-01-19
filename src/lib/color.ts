@@ -1,7 +1,7 @@
 import { clamp } from "./mathExt";
 
 function _clampValue(value: number): number {
-	return clamp(value, 0, 1);
+	return clamp(value, 0, 255);
 }
 
 export default class Color {
@@ -18,29 +18,30 @@ export default class Color {
 	}
 
 	public static default(): Color {
-		return new Color(0, 0, 0, 1);
+		return new Color(0, 0, 0, 255);
 	}
 
 	public static multiply(color: Color, alpha: number): Color {
-		const a = _clampValue(alpha);
+		const tmp = clamp(alpha, 0, 1);
 
-		const r = _clampValue(color.r * a);
-		const g = _clampValue(color.g * a);
-		const b = _clampValue(color.b * a);
+		const r = _clampValue(color.r * tmp);
+		const g = _clampValue(color.g * tmp);
+		const b = _clampValue(color.b * tmp);
+		const a = 255 * tmp;
 
 		return new Color(r, g, b, a);
 	}
 
 	public static fromHex(value: number, a?: number): Color {
-		const r = _clampValue((value >> 16) / 255);
-		const g = _clampValue(((value & 0x00ff00) >> 8) / 255);
-		const b = _clampValue((value & 0x0000ff) / 255);
+		const r = _clampValue(value >> 16);
+		const g = _clampValue((value & 0x00ff00) >> 8);
+		const b = _clampValue(value & 0x0000ff);
 
 		if (a === undefined) {
-			return new Color(r, g, b, 1);
+			return new Color(r, g, b, 255);
 		}
 
-		const temp = new Color(r, g, b, 1);
+		const temp = new Color(r, g, b, 255);
 
 		return Color.multiply(temp, a);
 	}
@@ -67,15 +68,15 @@ export default class Color {
 	}
 
 	public static fromRgb(r: number, g: number, b: number, a?: number): Color {
-		const sanitizedR = _clampValue(r / 255);
-		const sanitizedG = _clampValue(g / 255);
-		const sanitizedB = _clampValue(b / 255);
+		const sanitizedR = _clampValue(r);
+		const sanitizedG = _clampValue(g);
+		const sanitizedB = _clampValue(b);
 
 		if (a === undefined) {
-			return new Color(sanitizedR, sanitizedG, sanitizedB, 1);
+			return new Color(sanitizedR, sanitizedG, sanitizedB, 255);
 		}
 
-		const temp = new Color(sanitizedR, sanitizedG, sanitizedB, 1);
+		const temp = new Color(sanitizedR, sanitizedG, sanitizedB, 255);
 
 		return Color.multiply(temp, a);
 	}
