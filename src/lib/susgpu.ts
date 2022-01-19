@@ -1,4 +1,4 @@
-import * as WebGL from "./webgl1";
+import * as WebGL from "./webgl";
 
 // eslint-disable-next-line
 function noop(params?: unknown[]) {

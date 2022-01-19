@@ -1,11 +1,7 @@
-import * as SusGpu from "$lib/susgpu1";
+import * as WebGL from "./webgl";
 import Matrix4 from "$lib/matrix4";
 import Vector3 from "$lib/vector3";
 import type Color from "./color";
-
-// TODO(thismarvin): Shift to WebGL2? (Specifically instanced drawing).
-// TODO(thismarvin): Handle large dimensions properly.
-// TODO(thismarvin): Look into using a single Texture?
 
 function _createOrthographicCamera(
 	position: Vector3,
@@ -26,9 +22,9 @@ function _createOrthographicCamera(
 	return Matrix4.multiply(view, projection);
 }
 
-const source: SusGpu.ShaderSource = {
+const source = {
 	vertex: `
-	uniform mat4 viewProjection;
+	uniform mat4 camera;
 
 	attribute vec3 a_position;
 	attribute vec3 a_translation;
@@ -37,7 +33,7 @@ const source: SusGpu.ShaderSource = {
 	varying lowp vec4 v_color;
 
 	void main() {
-		gl_Position = viewProjection * vec4(a_position + a_translation, 1);
+		gl_Position = camera * vec4(a_position + a_translation, 1);
 		v_color = a_color;
 	}
 `,
@@ -59,35 +55,29 @@ export default class Pixels {
 		return this.width * this.height;
 	}
 
-	// TODO(thismarvin): Is it even worth keeping track of this?
-	// private data: Color[];
+	private readonly gl: WebGL2RenderingContext;
+	private readonly program: WebGLProgram;
+	private readonly camera: Matrix4;
+	private readonly vertexPositionsBuffer: WebGLBuffer;
+	private readonly vertexTranslationsBuffer: WebGLBuffer;
+	private readonly indexBuffer: WebGLBuffer;
 
-	public readonly vertexPositions: Float32Array;
-	public readonly vertexTranslations: Float32Array;
-	public vertexColors: Float32Array;
-	public readonly indices: Uint16Array;
-	public dirty: boolean;
-
-	public instance: SusGpu.Instance;
-	public surface: SusGpu.Surface;
-	public adapter: SusGpu.Adapter;
-	public device: SusGpu.Device;
-	public queue: SusGpu.Queue;
-
-	public camera: Matrix4;
-	public shaderModule: SusGpu.ShaderModule;
-	public cameraUniform: SusGpu.Buffer;
-	public vertexPositionsBuffer: SusGpu.Buffer;
-	public vertexTranslationsBuffer: SusGpu.Buffer;
-	public vertexColorsBuffer: SusGpu.Buffer;
-	public indexBuffer: SusGpu.Buffer;
-	public cameraGroup: SusGpu.BindGroup;
-	public pipeline: SusGpu.RenderPipeline;
+	private vertexColors: Uint8Array;
+	private vertexColorsBuffer: WebGLBuffer;
+	private dirty: boolean;
 
 	constructor(canvas: HTMLCanvasElement, width: number, height: number) {
 		this.canvas = canvas;
 		this.width = width;
 		this.height = height;
+
+		this.gl = canvas.getContext("webgl2");
+
+		if (this.gl === null) {
+			throw new TypeError("Could not get 'webgl2' context.");
+		}
+
+		this.program = WebGL.createProgram(this.gl, source.vertex, source.fragment);
 
 		this.camera = _createOrthographicCamera(
 			new Vector3(this.width * 0.5, -this.height * 0.5, 1),
@@ -99,167 +89,142 @@ export default class Pixels {
 			8
 		);
 
-		// this.data = new Array(this.width * this.height).fill(Color.default());
-
-		this.vertexPositions = new Float32Array(this.area * 4 * 3).fill(0);
-		this.vertexColors = new Float32Array(this.area * 4 * 4).fill(0);
-		this.vertexTranslations = new Float32Array(this.area * 4 * 3).fill(0);
-		this.indices = new Uint16Array(this.area * 6).fill(0);
-		this.dirty = false;
+		const vertexPositions = new Int8Array([
+			0,
+			0,
+			0,
+			0,
+			-1,
+			0,
+			1,
+			-1,
+			0,
+			1,
+			0,
+			0,
+		]);
+		const vertexTranslations = new Int16Array(this.area * 3).fill(0);
+		const indices = new Uint8Array([0, 1, 2, 0, 2, 3]);
 
 		for (let y = 0; y < this.height; ++y) {
 			for (let x = 0; x < this.width; ++x) {
 				const index = y * this.width + x;
-				const j = index * 12;
+				const j = index * 3;
 
-				this.vertexPositions[j + 0] = 0;
-				this.vertexPositions[j + 1] = 0;
-				this.vertexPositions[j + 2] = 0;
-
-				this.vertexPositions[j + 3] = 0;
-				this.vertexPositions[j + 4] = -1;
-				this.vertexPositions[j + 5] = 0;
-
-				this.vertexPositions[j + 6] = 1;
-				this.vertexPositions[j + 7] = -1;
-				this.vertexPositions[j + 8] = 0;
-
-				this.vertexPositions[j + 9] = 1;
-				this.vertexPositions[j + 10] = 0;
-				this.vertexPositions[j + 11] = 0;
-
-				this.vertexTranslations[j + 0] = x;
-				this.vertexTranslations[j + 1] = -y;
-				this.vertexTranslations[j + 2] = 0;
-
-				this.vertexTranslations[j + 3] = x;
-				this.vertexTranslations[j + 4] = -y;
-				this.vertexTranslations[j + 5] = 0;
-
-				this.vertexTranslations[j + 6] = x;
-				this.vertexTranslations[j + 7] = -y;
-				this.vertexTranslations[j + 8] = 0;
-
-				this.vertexTranslations[j + 9] = x;
-				this.vertexTranslations[j + 10] = -y;
-				this.vertexTranslations[j + 11] = 0;
+				vertexTranslations[j + 0] = x;
+				vertexTranslations[j + 1] = -y;
+				vertexTranslations[j + 2] = 0;
 			}
 		}
 
-		for (let i = 0; i < this.area; ++i) {
-			const start = 6 * i;
-			const buffer = 4 * i;
-
-			this.indices[start + 0] = buffer + 0;
-			this.indices[start + 1] = buffer + 1;
-			this.indices[start + 2] = buffer + 2;
-			this.indices[start + 3] = buffer + 0;
-			this.indices[start + 4] = buffer + 2;
-			this.indices[start + 5] = buffer + 3;
-		}
-
-		this.instance = new SusGpu.Instance();
-
-		this.surface = this.instance.createSurface(this.canvas);
-		this.adapter = this.instance.createAdapter({
-			compatibleSurface: this.surface,
-		});
-
-		[this.device, this.queue] = this.adapter.requestDevice({});
-
-		this.shaderModule = this.device.createShaderModule({ source });
-
-		this.cameraUniform = this.device.createBufferInit({
-			usage: SusGpu.BufferUsage.Uniform,
-			contents: this.camera.data,
-		});
-		this.vertexPositionsBuffer = this.device.createBufferInit({
-			usage: SusGpu.BufferUsage.Vertex,
-			contents: this.vertexPositions,
-		});
-		this.vertexTranslationsBuffer = this.device.createBufferInit({
-			usage: SusGpu.BufferUsage.Vertex,
-			contents: this.vertexTranslations,
-		});
-		this.vertexColorsBuffer = this.device.createBufferInit({
-			usage: SusGpu.BufferUsage.Vertex,
-			contents: this.vertexColors,
-		});
-		this.indexBuffer = this.device.createBufferInit({
-			usage: SusGpu.BufferUsage.Index,
-			contents: this.indices,
-		});
-
-		const vertexPositionsLayout = new SusGpu.VertexBufferLayout([
-			new SusGpu.VertexAttribute("a_position", SusGpu.AttributeType.Vec3),
-		]);
-		const vertexTranslationsLayout = new SusGpu.VertexBufferLayout([
-			new SusGpu.VertexAttribute("a_translation", SusGpu.AttributeType.Vec3),
-		]);
-		const vertexColorsLayout = new SusGpu.VertexBufferLayout([
-			new SusGpu.VertexAttribute("a_color", SusGpu.AttributeType.Vec4),
-		]);
-
-		const cameraLayout = this.device.createBindGroupLayout({
-			entries: [{ name: "viewProjection", type: SusGpu.UniformType.Matrix4 }],
-		});
-
-		this.cameraGroup = this.device.createBindGroup({ layout: cameraLayout }, [
-			{ resource: this.cameraUniform.asEntireBinding() },
-		]);
-
-		const pipelineLayout = this.device.createPipelineLayout({
-			bindGroupLayouts: [cameraLayout],
-		});
-
-		this.pipeline = this.device.createRenderPipeline({
-			layout: pipelineLayout,
-			module: this.shaderModule,
-			buffers: [
-				vertexPositionsLayout,
-				vertexTranslationsLayout,
-				vertexColorsLayout,
-			],
-			topology: SusGpu.PrimitiveTopology.Triangles,
-			frontFace: SusGpu.FrontFace.Ccw,
-			cullMode: SusGpu.Face.Back,
-		});
-	}
-
-	public clear(color: Color): void {
-		// for (let i = 0; i < this.width * this.height; ++i) {
-		// 	this.data[i] = color;
-		// }
-
-		const r = color.r;
-		const g = color.g;
-		const b = color.b;
-		const a = color.a;
+		this.vertexColors = new Uint8Array(this.area * 4).fill(0);
 
 		for (let y = 0; y < this.height; ++y) {
 			for (let x = 0; x < this.width; ++x) {
 				const index = y * this.width + x;
-				const j = index * 16;
+				const j = index * 4;
 
-				this.vertexColors[j + 0] = r;
-				this.vertexColors[j + 1] = g;
-				this.vertexColors[j + 2] = b;
-				this.vertexColors[j + 3] = a;
+				this.vertexColors[j + 0] = 0;
+				this.vertexColors[j + 1] = 0;
+				this.vertexColors[j + 2] = 0;
+				this.vertexColors[j + 3] = 255;
+			}
+		}
 
-				this.vertexColors[j + 4] = r;
-				this.vertexColors[j + 5] = g;
-				this.vertexColors[j + 6] = b;
-				this.vertexColors[j + 7] = a;
+		this.dirty = false;
 
-				this.vertexColors[j + 8] = r;
-				this.vertexColors[j + 9] = g;
-				this.vertexColors[j + 10] = b;
-				this.vertexColors[j + 11] = a;
+		this.gl.useProgram(this.program);
+		{
+			const location = this.gl.getUniformLocation(this.program, "camera");
+			this.gl.uniformMatrix4fv(location, false, this.camera.data);
+		}
 
-				this.vertexColors[j + 12] = r;
-				this.vertexColors[j + 13] = g;
-				this.vertexColors[j + 14] = b;
-				this.vertexColors[j + 15] = a;
+		this.vertexPositionsBuffer = WebGL.createBufferInit(
+			this.gl,
+			WebGL.BufferUsage.Vertex,
+			vertexPositions
+		);
+		{
+			const index = this.gl.getAttribLocation(this.program, "a_position");
+
+			this.gl.bindBuffer(WebGL.BufferUsage.Vertex, this.vertexPositionsBuffer);
+			this.gl.enableVertexAttribArray(index);
+			this.gl.vertexAttribPointer(
+				index,
+				3,
+				WebGL.AttributeType.Byte,
+				false,
+				3,
+				0
+			);
+			this.gl.vertexAttribDivisor(index, 0);
+		}
+
+		this.vertexTranslationsBuffer = WebGL.createBufferInit(
+			this.gl,
+			WebGL.BufferUsage.Vertex,
+			vertexTranslations
+		);
+		{
+			const index = this.gl.getAttribLocation(this.program, "a_translation");
+
+			this.gl.bindBuffer(
+				WebGL.BufferUsage.Vertex,
+				this.vertexTranslationsBuffer
+			);
+			this.gl.enableVertexAttribArray(index);
+			this.gl.vertexAttribPointer(
+				index,
+				3,
+				WebGL.AttributeType.Short,
+				false,
+				6,
+				0
+			);
+			this.gl.vertexAttribDivisor(index, 1);
+		}
+
+		this.vertexColorsBuffer = WebGL.createBufferInit(
+			this.gl,
+			WebGL.BufferUsage.Vertex,
+			this.vertexColors
+		);
+		{
+			const index = this.gl.getAttribLocation(this.program, "a_color");
+
+			this.gl.bindBuffer(WebGL.BufferUsage.Vertex, this.vertexColorsBuffer);
+			this.gl.enableVertexAttribArray(index);
+			this.gl.vertexAttribPointer(
+				index,
+				4,
+				WebGL.AttributeType.UnsignedByte,
+				true,
+				4,
+				0
+			);
+			this.gl.vertexAttribDivisor(index, 1);
+		}
+
+		this.indexBuffer = WebGL.createBufferInit(
+			this.gl,
+			WebGL.BufferUsage.Index,
+			indices
+		);
+		{
+			this.gl.bindBuffer(WebGL.BufferUsage.Index, this.indexBuffer);
+		}
+	}
+
+	public clear(color: Color): void {
+		for (let y = 0; y < this.height; ++y) {
+			for (let x = 0; x < this.width; ++x) {
+				const index = y * this.width + x;
+				const j = index * 4;
+
+				this.vertexColors[j + 0] = color.r;
+				this.vertexColors[j + 1] = color.g;
+				this.vertexColors[j + 2] = color.b;
+				this.vertexColors[j + 3] = color.a;
 			}
 		}
 
@@ -268,63 +233,37 @@ export default class Pixels {
 
 	public set(x: number, y: number, color: Color): void {
 		if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
-			return;
+			throw new Error("Index out of bounds.");
 		}
 
 		const index = y * this.width + x;
+		const j = index * 4;
 
-		// this.data[index] = color;
-
-		const j = index * 16;
-		const r = color.r;
-		const g = color.g;
-		const b = color.b;
-		const a = color.a;
-
-		this.vertexColors[j + 0] = r;
-		this.vertexColors[j + 1] = g;
-		this.vertexColors[j + 2] = b;
-		this.vertexColors[j + 3] = a;
-
-		this.vertexColors[j + 4] = r;
-		this.vertexColors[j + 5] = g;
-		this.vertexColors[j + 6] = b;
-		this.vertexColors[j + 7] = a;
-
-		this.vertexColors[j + 8] = r;
-		this.vertexColors[j + 9] = g;
-		this.vertexColors[j + 10] = b;
-		this.vertexColors[j + 11] = a;
-
-		this.vertexColors[j + 12] = r;
-		this.vertexColors[j + 13] = g;
-		this.vertexColors[j + 14] = b;
-		this.vertexColors[j + 15] = a;
+		this.vertexColors[j + 0] = color.r;
+		this.vertexColors[j + 1] = color.g;
+		this.vertexColors[j + 2] = color.b;
+		this.vertexColors[j + 3] = color.a;
 
 		this.dirty = true;
 	}
 
 	public draw(): void {
 		if (this.dirty) {
-			this.queue.writeBuffer(this.vertexColorsBuffer, this.vertexColors);
+			WebGL.setVertexBufferData(
+				this.gl,
+				this.vertexColorsBuffer,
+				this.vertexColors
+			);
+
+			this.dirty = false;
 		}
 
-		const encoder = this.device.createCommandEncoder({});
-
-		encoder
-			.beginRenderPass({
-				colorAttachment: { op: { kind: SusGpu.LoadOpKind.Load } },
-			})
-			.setPipeline(this.pipeline)
-			.setBindGroup(this.cameraGroup)
-			.setVertexBuffer(
-				this.vertexPositionsBuffer,
-				this.vertexTranslationsBuffer,
-				this.vertexColorsBuffer
-			)
-			.setIndexBuffer(this.indexBuffer)
-			.drawIndexed(this.area * 2);
-
-		this.queue.submit(encoder.finish());
+		this.gl.drawElementsInstanced(
+			WebGL.DrawMode.Triangles,
+			6,
+			this.gl.UNSIGNED_BYTE,
+			0,
+			this.area
+		);
 	}
 }
