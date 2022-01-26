@@ -3,4 +3,4 @@
   publish = "build"
 
 [functions]
-	node_bundler = "esbulid"
+	node_bundler = "esbuild"
