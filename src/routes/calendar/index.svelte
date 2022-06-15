@@ -8,12 +8,12 @@
 	let lifeExpectancy = 79;
 
 	let validDate = false;
-	let parseError = "";
+	let parseError: string | undefined = "";
 
 	$: dob = $page.url.searchParams.get("dob");
 	$: receivedQuery = dob !== null;
 
-	$: if (receivedQuery) {
+	$: if (dob !== null) {
 		[validDate, parseError] = isValidDate(dob);
 	}
 
@@ -37,7 +37,7 @@
 			return [false, "Time travel is dangerous!"];
 		}
 
-		return [true, null];
+		return [true, undefined];
 	}
 </script>
 
@@ -64,7 +64,7 @@
 				</div>
 			{/if}
 		{:else}
-			<Calendar {lifeExpectancy} {dob} />
+			<Calendar {lifeExpectancy} dob={dob ?? "unreachable"} />
 		{/if}
 	</section>
 </main>

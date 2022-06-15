@@ -23,7 +23,7 @@
 	const pieceLookup = new Array(64).fill(null);
 
 	for (let i = 0; i < 64; ++i) {
-		if (pieces[i] != "") {
+		if (pieces[i] !== "") {
 			pieceLookup[i] = i;
 		}
 	}
@@ -237,7 +237,7 @@
 	});
 
 	onDestroy(() => {
-		if (browser) {
+		if (browser && requestHandle !== null) {
 			cancelAnimationFrame(requestHandle);
 		}
 	});

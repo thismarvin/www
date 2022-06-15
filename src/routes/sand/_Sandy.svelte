@@ -109,7 +109,7 @@
 	let currentMaterial = Material.Sand;
 
 	const smartPointer = new SmartPointer();
-	let startingPosition: number[] | null = null;
+	let startingPosition: number[] = [0, 0];
 
 	function setCurrentMaterial(material: number): void {
 		currentMaterial = material;
@@ -209,20 +209,20 @@
 
 	function update() {
 		if (startingPosition !== null) {
-			startingPosition = [smartPointer.x, smartPointer.y];
+			startingPosition = [smartPointer.x ?? 0, smartPointer.y ?? 0];
 		}
 
 		smartPointer.update();
 
 		if (smartPointer.pressed("LeftClick")) {
-			startingPosition = [smartPointer.x, smartPointer.y];
+			startingPosition = [smartPointer.x ?? 0, smartPointer.y ?? 0];
 		}
 
 		if (smartPointer.pressing("LeftClick")) {
 			const x1 = Math.floor(startingPosition[0] / scale);
 			const y1 = Math.floor(startingPosition[1] / scale);
-			const x2 = Math.floor(smartPointer.x / scale);
-			const y2 = Math.floor(smartPointer.y / scale);
+			const x2 = Math.floor((smartPointer.x ?? 0) / scale);
+			const y2 = Math.floor((smartPointer.y ?? 0) / scale);
 
 			world.paint(
 				x1,
@@ -258,7 +258,7 @@
 				let color = getColor(material, tint);
 				let alpha = getAlpha(material, x, y);
 
-				if (alpha != 1) {
+				if (alpha !== 1) {
 					color = Color.multiply(color, alpha);
 				}
 
@@ -307,6 +307,13 @@
 	}
 
 	onMount(() => {
+		if (parent == null) {
+			throw new TypeError("Could not bind `parent`.");
+		}
+		if (canvas == null) {
+			throw new TypeError("Could not bind `canvas`.");
+		}
+
 		canvas.width = parent.clientWidth * 2;
 		canvas.height = parent.clientHeight * 2;
 		canvas.style.width = `${parent.clientWidth}px`;
@@ -322,7 +329,7 @@
 	});
 
 	onDestroy(() => {
-		if (browser) {
+		if (browser && requestHandle !== null) {
 			cancelAnimationFrame(requestHandle);
 		}
 	});

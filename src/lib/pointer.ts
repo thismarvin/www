@@ -87,24 +87,40 @@ export default class SmartPointer {
 		this.#element = null;
 		this.#previousPointerState = null;
 		this.#currentPointerState = null;
+		this.#nextX = 0;
+		this.#nextY = 0;
+		this.#nextButtons = 0;
+		this.#nextLastEvent = null;
 	}
 
 	public attachElement(element: HTMLElement): void {
 		this.#element = element;
 
 		this.#element.addEventListener("pointermove", (event) => {
+			if (this.#element === null) {
+				throw new Error("unreachable");
+			}
+
 			this.#nextX = event.pageX - this.#element.offsetLeft;
 			this.#nextY = event.pageY - this.#element.offsetTop;
 			this.#nextButtons = event.buttons;
 			this.#nextLastEvent = event;
 		});
 		this.#element.addEventListener("pointerdown", (event) => {
+			if (this.#element === null) {
+				throw new Error("unreachable");
+			}
+
 			this.#nextX = event.pageX - this.#element.offsetLeft;
 			this.#nextY = event.pageY - this.#element.offsetTop;
 			this.#nextButtons = event.buttons;
 			this.#nextLastEvent = event;
 		});
 		this.#element.addEventListener("pointerup", (event) => {
+			if (this.#element === null) {
+				throw new Error("unreachable");
+			}
+
 			this.#nextX = event.pageX - this.#element.offsetLeft;
 			this.#nextY = event.pageY - this.#element.offsetTop;
 			this.#nextButtons = event.buttons;
@@ -116,7 +132,11 @@ export default class SmartPointer {
 		});
 	}
 
-	public getState(): PointerState {
+	public getState(): PointerState | null {
+		if (this.#nextLastEvent == null) {
+			return null;
+		}
+
 		return new PointerState(
 			this.#nextX,
 			this.#nextY,

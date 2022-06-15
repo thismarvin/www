@@ -1,21 +1,11 @@
 <script context="module" lang="ts">
-	type LoadInput = {
-		error?: Error;
-		status?: number;
-	};
+	import type { LoadEvent, LoadOutput } from "@sveltejs/kit";
 
-	type LoadOutput = {
-		props: {
-			status: number;
-			message: string;
-		};
-	};
-
-	export function load({ error, status }: LoadInput): LoadOutput {
+	export function load({ error, status }: LoadEvent): LoadOutput {
 		return {
 			props: {
-				status: status,
-				message: error.message,
+				status,
+				message: error?.message ?? "Something went wrong!",
 			},
 		};
 	}

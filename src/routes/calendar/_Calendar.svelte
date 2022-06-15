@@ -64,7 +64,7 @@
 	onMount(() => loop(0));
 
 	onDestroy(() => {
-		if (browser) {
+		if (browser && requestHandle !== null) {
 			cancelAnimationFrame(requestHandle);
 		}
 	});
