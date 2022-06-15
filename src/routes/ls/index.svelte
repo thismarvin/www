@@ -149,8 +149,6 @@
 </main>
 
 <style lang="scss">
-	@import "../../mixins.scss";
-
 	main {
 		margin: auto;
 		max-width: calc(800px - 4px);

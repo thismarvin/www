@@ -90,18 +90,7 @@ export default class Pixels {
 		);
 
 		const vertexPositions = new Int8Array([
-			0,
-			0,
-			0,
-			0,
-			-1,
-			0,
-			1,
-			-1,
-			0,
-			1,
-			0,
-			0,
+			0, 0, 0, 0, -1, 0, 1, -1, 0, 1, 0, 0,
 		]);
 		const vertexTranslations = new Int16Array(this.area * 3).fill(0);
 		const indices = new Uint8Array([0, 1, 2, 0, 2, 3]);

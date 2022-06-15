@@ -50,8 +50,6 @@
 </main>
 
 <style lang="scss">
-	@import "../mixins.scss";
-
 	main {
 		display: flex;
 		margin: auto;
