@@ -71,11 +71,13 @@ export default class Pixels {
 		this.width = width;
 		this.height = height;
 
-		this.gl = canvas.getContext("webgl2");
+		const gl = canvas.getContext("webgl2");
 
-		if (this.gl === null) {
+		if (gl === null) {
 			throw new TypeError("Could not get 'webgl2' context.");
 		}
+
+		this.gl = gl;
 
 		this.program = WebGL.createProgram(this.gl, source.vertex, source.fragment);
 
