@@ -20,14 +20,16 @@
 	}
 
 	function cellTypeOpposite(type: CellType): CellType {
-		switch (type) {
-			case CellType.Dead:
-				return CellType.Alive;
-			case CellType.Alive:
-				return CellType.Dead;
-			default:
-				CellType.None;
-		}
+		return (() => {
+			switch (type) {
+				case CellType.Dead:
+					return CellType.Alive;
+				case CellType.Alive:
+					return CellType.Dead;
+				default:
+					return CellType.None;
+			}
+		})();
 	}
 
 	const width = 15;
@@ -109,7 +111,7 @@
 			return;
 		}
 
-		let temp = [];
+		let temp: CellType[][] = [];
 
 		for (let y = 0; y < height; ++y) {
 			temp.push([]);
@@ -180,7 +182,7 @@
 	onMount(() => loop(0));
 
 	onDestroy(() => {
-		if (browser) {
+		if (browser && requestHandle !== null) {
 			cancelAnimationFrame(requestHandle);
 		}
 	});

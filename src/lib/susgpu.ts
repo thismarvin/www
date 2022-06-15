@@ -770,7 +770,7 @@ export class RenderPass {
 export class RenderInner {
 	private readonly gl: WebGLRenderingContext;
 
-	private pipeline?: RenderPipeline;
+	private pipeline: RenderPipeline | null;
 
 	constructor(gl: WebGLRenderingContext) {
 		this.gl = gl;
@@ -799,6 +799,10 @@ export class RenderInner {
 	}
 
 	setBindGroup(...groups: BindGroup[]): void {
+		if (this.pipeline === null) {
+			throw new TypeError("A pipeline has not been set.");
+		}
+
 		for (let i = 0; i < groups.length; ++i) {
 			for (
 				let j = 0;
@@ -856,6 +860,10 @@ export class RenderInner {
 	}
 
 	setVertexBuffer(...vertexBuffers: Buffer[]): void {
+		if (this.pipeline === null) {
+			throw new TypeError("A pipeline has not been set.");
+		}
+
 		for (let i = 0; i < vertexBuffers.length; ++i) {
 			this.gl.bindBuffer(
 				WebGL.BufferUsage.Vertex,
@@ -896,6 +904,10 @@ export class RenderInner {
 
 	// TODO(thismarvin): The parameters are wrong!
 	drawIndexed(totalTriangles: number): void {
+		if (this.pipeline === null) {
+			throw new TypeError("A pipeline has not been set.");
+		}
+
 		this.gl.drawElements(
 			this.pipeline.descriptor.topology,
 			totalTriangles * 3,
