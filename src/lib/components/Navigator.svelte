@@ -55,8 +55,6 @@
 </div>
 
 <style lang="scss">
-	@import "../../mixins.scss";
-
 	ul {
 		margin: 0;
 		padding: 0;

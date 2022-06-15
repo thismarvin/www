@@ -31,8 +31,6 @@
 </footer>
 
 <style lang="scss">
-	@import "../../mixins.scss";
-
 	footer {
 		background-color: var(--palette-almost-white);
 	}

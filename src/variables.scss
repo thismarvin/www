@@ -1,3 +1,5 @@
+/* Variables and mixins declared here will be available in all other SCSS files */
+
 @mixin medium {
 	@media (min-width: 800px) {
 		@content;
