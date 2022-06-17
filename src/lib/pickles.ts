@@ -55,16 +55,16 @@ export default class Pixels {
 		return this.width * this.height;
 	}
 
-	private readonly gl: WebGL2RenderingContext;
-	private readonly program: WebGLProgram;
-	private readonly camera: Matrix4;
-	private readonly vertexPositionsBuffer: WebGLBuffer;
-	private readonly vertexTranslationsBuffer: WebGLBuffer;
-	private readonly indexBuffer: WebGLBuffer;
+	readonly #gl: WebGL2RenderingContext;
+	readonly #program: WebGLProgram;
+	readonly #camera: Matrix4;
+	readonly #vertexPositionsBuffer: WebGLBuffer;
+	readonly #vertexTranslationsBuffer: WebGLBuffer;
+	readonly #indexBuffer: WebGLBuffer;
 
-	private vertexColors: Uint8Array;
-	private vertexColorsBuffer: WebGLBuffer;
-	private dirty: boolean;
+	#vertexColors: Uint8Array;
+	#vertexColorsBuffer: WebGLBuffer;
+	#dirty: boolean;
 
 	constructor(canvas: HTMLCanvasElement, width: number, height: number) {
 		this.canvas = canvas;
@@ -77,11 +77,15 @@ export default class Pixels {
 			throw new TypeError("Could not get 'webgl2' context.");
 		}
 
-		this.gl = gl;
+		this.#gl = gl;
 
-		this.program = WebGL.createProgram(this.gl, source.vertex, source.fragment);
+		this.#program = WebGL.createProgram(
+			this.#gl,
+			source.vertex,
+			source.fragment
+		);
 
-		this.camera = _createOrthographicCamera(
+		this.#camera = _createOrthographicCamera(
 			new Vector3(this.width * 0.5, -this.height * 0.5, 1),
 			Vector3.FORWARD,
 			Vector3.UP,
@@ -108,39 +112,42 @@ export default class Pixels {
 			}
 		}
 
-		this.vertexColors = new Uint8Array(this.area * 4).fill(0);
+		this.#vertexColors = new Uint8Array(this.area * 4).fill(0);
 
 		for (let y = 0; y < this.height; ++y) {
 			for (let x = 0; x < this.width; ++x) {
 				const index = y * this.width + x;
 				const j = index * 4;
 
-				this.vertexColors[j + 0] = 0;
-				this.vertexColors[j + 1] = 0;
-				this.vertexColors[j + 2] = 0;
-				this.vertexColors[j + 3] = 255;
+				this.#vertexColors[j + 0] = 0;
+				this.#vertexColors[j + 1] = 0;
+				this.#vertexColors[j + 2] = 0;
+				this.#vertexColors[j + 3] = 255;
 			}
 		}
 
-		this.dirty = false;
+		this.#dirty = false;
 
-		this.gl.useProgram(this.program);
+		this.#gl.useProgram(this.#program);
 		{
-			const location = this.gl.getUniformLocation(this.program, "camera");
-			this.gl.uniformMatrix4fv(location, false, this.camera.data);
+			const location = this.#gl.getUniformLocation(this.#program, "camera");
+			this.#gl.uniformMatrix4fv(location, false, this.#camera.data);
 		}
 
-		this.vertexPositionsBuffer = WebGL.createBufferInit(
-			this.gl,
+		this.#vertexPositionsBuffer = WebGL.createBufferInit(
+			this.#gl,
 			WebGL.BufferUsage.Vertex,
 			vertexPositions
 		);
 		{
-			const index = this.gl.getAttribLocation(this.program, "a_position");
+			const index = this.#gl.getAttribLocation(this.#program, "a_position");
 
-			this.gl.bindBuffer(WebGL.BufferUsage.Vertex, this.vertexPositionsBuffer);
-			this.gl.enableVertexAttribArray(index);
-			this.gl.vertexAttribPointer(
+			this.#gl.bindBuffer(
+				WebGL.BufferUsage.Vertex,
+				this.#vertexPositionsBuffer
+			);
+			this.#gl.enableVertexAttribArray(index);
+			this.#gl.vertexAttribPointer(
 				index,
 				3,
 				WebGL.AttributeType.Byte,
@@ -148,23 +155,23 @@ export default class Pixels {
 				3,
 				0
 			);
-			this.gl.vertexAttribDivisor(index, 0);
+			this.#gl.vertexAttribDivisor(index, 0);
 		}
 
-		this.vertexTranslationsBuffer = WebGL.createBufferInit(
-			this.gl,
+		this.#vertexTranslationsBuffer = WebGL.createBufferInit(
+			this.#gl,
 			WebGL.BufferUsage.Vertex,
 			vertexTranslations
 		);
 		{
-			const index = this.gl.getAttribLocation(this.program, "a_translation");
+			const index = this.#gl.getAttribLocation(this.#program, "a_translation");
 
-			this.gl.bindBuffer(
+			this.#gl.bindBuffer(
 				WebGL.BufferUsage.Vertex,
-				this.vertexTranslationsBuffer
+				this.#vertexTranslationsBuffer
 			);
-			this.gl.enableVertexAttribArray(index);
-			this.gl.vertexAttribPointer(
+			this.#gl.enableVertexAttribArray(index);
+			this.#gl.vertexAttribPointer(
 				index,
 				3,
 				WebGL.AttributeType.Short,
@@ -172,20 +179,20 @@ export default class Pixels {
 				6,
 				0
 			);
-			this.gl.vertexAttribDivisor(index, 1);
+			this.#gl.vertexAttribDivisor(index, 1);
 		}
 
-		this.vertexColorsBuffer = WebGL.createBufferInit(
-			this.gl,
+		this.#vertexColorsBuffer = WebGL.createBufferInit(
+			this.#gl,
 			WebGL.BufferUsage.Vertex,
-			this.vertexColors
+			this.#vertexColors
 		);
 		{
-			const index = this.gl.getAttribLocation(this.program, "a_color");
+			const index = this.#gl.getAttribLocation(this.#program, "a_color");
 
-			this.gl.bindBuffer(WebGL.BufferUsage.Vertex, this.vertexColorsBuffer);
-			this.gl.enableVertexAttribArray(index);
-			this.gl.vertexAttribPointer(
+			this.#gl.bindBuffer(WebGL.BufferUsage.Vertex, this.#vertexColorsBuffer);
+			this.#gl.enableVertexAttribArray(index);
+			this.#gl.vertexAttribPointer(
 				index,
 				4,
 				WebGL.AttributeType.UnsignedByte,
@@ -193,16 +200,16 @@ export default class Pixels {
 				4,
 				0
 			);
-			this.gl.vertexAttribDivisor(index, 1);
+			this.#gl.vertexAttribDivisor(index, 1);
 		}
 
-		this.indexBuffer = WebGL.createBufferInit(
-			this.gl,
+		this.#indexBuffer = WebGL.createBufferInit(
+			this.#gl,
 			WebGL.BufferUsage.Index,
 			indices
 		);
 		{
-			this.gl.bindBuffer(WebGL.BufferUsage.Index, this.indexBuffer);
+			this.#gl.bindBuffer(WebGL.BufferUsage.Index, this.#indexBuffer);
 		}
 	}
 
@@ -212,14 +219,14 @@ export default class Pixels {
 				const index = y * this.width + x;
 				const j = index * 4;
 
-				this.vertexColors[j + 0] = color.r;
-				this.vertexColors[j + 1] = color.g;
-				this.vertexColors[j + 2] = color.b;
-				this.vertexColors[j + 3] = color.a;
+				this.#vertexColors[j + 0] = color.r;
+				this.#vertexColors[j + 1] = color.g;
+				this.#vertexColors[j + 2] = color.b;
+				this.#vertexColors[j + 3] = color.a;
 			}
 		}
 
-		this.dirty = true;
+		this.#dirty = true;
 	}
 
 	public set(x: number, y: number, color: Color): void {
@@ -230,29 +237,29 @@ export default class Pixels {
 		const index = y * this.width + x;
 		const j = index * 4;
 
-		this.vertexColors[j + 0] = color.r;
-		this.vertexColors[j + 1] = color.g;
-		this.vertexColors[j + 2] = color.b;
-		this.vertexColors[j + 3] = color.a;
+		this.#vertexColors[j + 0] = color.r;
+		this.#vertexColors[j + 1] = color.g;
+		this.#vertexColors[j + 2] = color.b;
+		this.#vertexColors[j + 3] = color.a;
 
-		this.dirty = true;
+		this.#dirty = true;
 	}
 
 	public draw(): void {
-		if (this.dirty) {
+		if (this.#dirty) {
 			WebGL.setVertexBufferData(
-				this.gl,
-				this.vertexColorsBuffer,
-				this.vertexColors
+				this.#gl,
+				this.#vertexColorsBuffer,
+				this.#vertexColors
 			);
 
-			this.dirty = false;
+			this.#dirty = false;
 		}
 
-		this.gl.drawElementsInstanced(
+		this.#gl.drawElementsInstanced(
 			WebGL.DrawMode.Triangles,
 			6,
-			this.gl.UNSIGNED_BYTE,
+			this.#gl.UNSIGNED_BYTE,
 			0,
 			this.area
 		);

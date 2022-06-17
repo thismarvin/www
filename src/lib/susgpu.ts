@@ -48,16 +48,16 @@ export type DeviceDescriptor = {
 };
 
 export class Adapter {
-	private readonly surface: Surface;
+	readonly #surface: Surface;
 
 	constructor(surface: Surface) {
-		this.surface = surface;
+		this.#surface = surface;
 	}
 
 	public requestDevice(descriptor: DeviceDescriptor): [Device, Queue] {
 		noop([descriptor]);
 
-		const ctx = this.surface.canvas.getContext("webgl");
+		const ctx = this.#surface.canvas.getContext("webgl");
 
 		if (ctx === null) {
 			throw new TypeError("Could not get webgl context.");
@@ -68,10 +68,10 @@ export class Adapter {
 }
 
 export class Device {
-	private readonly ctx: WebGLRenderingContext;
+	readonly #ctx: WebGLRenderingContext;
 
 	constructor(ctx: WebGLRenderingContext) {
-		this.ctx = ctx;
+		this.#ctx = ctx;
 	}
 
 	// public createTexture(): void {/**/}
@@ -81,7 +81,7 @@ export class Device {
 	public createShaderModule(descriptor: ShaderModuleDescriptor): ShaderModule {
 		return new ShaderModule(
 			WebGL.createProgram(
-				this.ctx,
+				this.#ctx,
 				descriptor.source.vertex,
 				descriptor.source.fragment
 			)
@@ -108,7 +108,7 @@ export class Device {
 					return {
 						kind: BufferKind.Vertex,
 						contents: WebGL.allocateVertexBuffer(
-							this.ctx,
+							this.#ctx,
 							descriptor.size,
 							WebGL.VertexUsage.Static
 						),
@@ -118,7 +118,7 @@ export class Device {
 					return {
 						kind: BufferKind.Index,
 						contents: WebGL.allocateIndexBuffer(
-							this.ctx,
+							this.#ctx,
 							descriptor.size,
 							WebGL.VertexUsage.Static
 						),
@@ -146,7 +146,7 @@ export class Device {
 		switch (descriptor.usage) {
 			case BufferUsage.Vertex: {
 				WebGL.setVertexBufferData(
-					this.ctx,
+					this.#ctx,
 					buffer.internal.contents as WebGLBuffer,
 					descriptor.contents as Float32Array
 				);
@@ -155,7 +155,7 @@ export class Device {
 			}
 			case BufferUsage.Index: {
 				WebGL.setIndexBufferData(
-					this.ctx,
+					this.#ctx,
 					buffer.internal.contents as WebGLBuffer,
 					descriptor.contents as Uint16Array
 				);
@@ -494,10 +494,10 @@ export class RenderPipeline {
 }
 
 export class Queue {
-	private readonly ctx: WebGLRenderingContext;
+	readonly #ctx: WebGLRenderingContext;
 
 	constructor(ctx: WebGLRenderingContext) {
-		this.ctx = ctx;
+		this.#ctx = ctx;
 	}
 
 	// public writeTexture(): void {/**/}
@@ -506,7 +506,7 @@ export class Queue {
 		switch (buffer.descriptor.usage) {
 			case BufferUsage.Vertex: {
 				WebGL.setVertexBufferData(
-					this.ctx,
+					this.#ctx,
 					buffer.internal.contents as WebGLBuffer,
 					data as Float32Array
 				);
@@ -515,7 +515,7 @@ export class Queue {
 			}
 			case BufferUsage.Index: {
 				WebGL.setIndexBufferData(
-					this.ctx,
+					this.#ctx,
 					buffer.internal.contents as WebGLBuffer,
 					data as Float32Array
 				);
@@ -531,7 +531,7 @@ export class Queue {
 	}
 
 	public submit(...buffers: CommandBuffer[]): void {
-		const inner = new RenderInner(this.ctx);
+		const inner = new RenderInner(this.#ctx);
 
 		for (let i = 0; i < buffers.length; ++i) {
 			const commandBuffer = buffers[i];
@@ -768,38 +768,38 @@ export class RenderPass {
 }
 
 export class RenderInner {
-	private readonly gl: WebGLRenderingContext;
+	readonly #gl: WebGLRenderingContext;
 
-	private pipeline: RenderPipeline | null;
+	#pipeline: RenderPipeline | null;
 
 	constructor(gl: WebGLRenderingContext) {
-		this.gl = gl;
+		this.#gl = gl;
 
-		this.pipeline = null;
+		this.#pipeline = null;
 
 		// TODO(thismarvin): I have no idea where to put this...
 		// this.gl.viewport(0, 0, canvas.width, canvas.height);
 	}
 
 	clearColor(color: Color): void {
-		this.gl.clearColor(color.r, color.g, color.b, color.a);
-		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+		this.#gl.clearColor(color.r, color.g, color.b, color.a);
+		this.#gl.clear(this.#gl.COLOR_BUFFER_BIT);
 	}
 
 	setPipeline(pipeline: RenderPipeline): void {
-		this.pipeline = pipeline;
+		this.#pipeline = pipeline;
 
-		this.gl.useProgram(this.pipeline.descriptor.module.program);
+		this.#gl.useProgram(this.#pipeline.descriptor.module.program);
 
-		if (this.pipeline.descriptor.cullMode !== undefined) {
-			this.gl.enable(this.gl.CULL_FACE);
-			this.gl.cullFace(this.pipeline.descriptor.cullMode);
-			this.gl.frontFace(this.pipeline.descriptor.frontFace);
+		if (this.#pipeline.descriptor.cullMode !== undefined) {
+			this.#gl.enable(this.#gl.CULL_FACE);
+			this.#gl.cullFace(this.#pipeline.descriptor.cullMode);
+			this.#gl.frontFace(this.#pipeline.descriptor.frontFace);
 		}
 	}
 
 	setBindGroup(...groups: BindGroup[]): void {
-		if (this.pipeline === null) {
+		if (this.#pipeline === null) {
 			throw new TypeError("A pipeline has not been set.");
 		}
 
@@ -809,9 +809,9 @@ export class RenderInner {
 				j < groups[i].descriptor.layout.descriptor.entries.length;
 				++j
 			) {
-				const location = this.gl.getUniformLocation(
-					this.pipeline.descriptor.module.program,
-					this.pipeline.descriptor.layout.descriptor.bindGroupLayouts[i]
+				const location = this.#gl.getUniformLocation(
+					this.#pipeline.descriptor.module.program,
+					this.#pipeline.descriptor.layout.descriptor.bindGroupLayouts[i]
 						.descriptor.entries[j].name
 				);
 
@@ -820,37 +820,37 @@ export class RenderInner {
 
 				switch (groups[i].descriptor.layout.descriptor.entries[j].type) {
 					case UniformType.Float32: {
-						this.gl.uniform1fv(location, buffer.contents);
+						this.#gl.uniform1fv(location, buffer.contents);
 
 						break;
 					}
 					case UniformType.Vector2: {
-						this.gl.uniform2fv(location, buffer.contents);
+						this.#gl.uniform2fv(location, buffer.contents);
 
 						break;
 					}
 					case UniformType.Vector3: {
-						this.gl.uniform3fv(location, buffer.contents);
+						this.#gl.uniform3fv(location, buffer.contents);
 
 						break;
 					}
 					case UniformType.Vector4: {
-						this.gl.uniform4fv(location, buffer.contents);
+						this.#gl.uniform4fv(location, buffer.contents);
 
 						break;
 					}
 					case UniformType.Matrix2: {
-						this.gl.uniformMatrix2fv(location, false, buffer.contents);
+						this.#gl.uniformMatrix2fv(location, false, buffer.contents);
 
 						break;
 					}
 					case UniformType.Matrix3: {
-						this.gl.uniformMatrix3fv(location, false, buffer.contents);
+						this.#gl.uniformMatrix3fv(location, false, buffer.contents);
 
 						break;
 					}
 					case UniformType.Matrix4: {
-						this.gl.uniformMatrix4fv(location, false, buffer.contents);
+						this.#gl.uniformMatrix4fv(location, false, buffer.contents);
 
 						break;
 					}
@@ -860,19 +860,19 @@ export class RenderInner {
 	}
 
 	setVertexBuffer(...vertexBuffers: Buffer[]): void {
-		if (this.pipeline === null) {
+		if (this.#pipeline === null) {
 			throw new TypeError("A pipeline has not been set.");
 		}
 
 		for (let i = 0; i < vertexBuffers.length; ++i) {
-			this.gl.bindBuffer(
+			this.#gl.bindBuffer(
 				WebGL.BufferUsage.Vertex,
 				vertexBuffers[i].internal.contents as WebGLBuffer
 			);
 
-			for (const attribute of this.pipeline.descriptor.buffers[i].attributes) {
-				const index = this.gl.getAttribLocation(
-					this.pipeline.descriptor.module.program,
+			for (const attribute of this.#pipeline.descriptor.buffers[i].attributes) {
+				const index = this.#gl.getAttribLocation(
+					this.#pipeline.descriptor.module.program,
 					attribute.name
 				);
 
@@ -882,8 +882,8 @@ export class RenderInner {
 					);
 				}
 
-				this.gl.enableVertexAttribArray(index);
-				this.gl.vertexAttribPointer(
+				this.#gl.enableVertexAttribArray(index);
+				this.#gl.vertexAttribPointer(
 					index,
 					attribute.size,
 					WebGL.AttributeType.Float,
@@ -896,7 +896,7 @@ export class RenderInner {
 	}
 
 	setIndexBuffer(indexBuffer: Buffer): void {
-		this.gl.bindBuffer(
+		this.#gl.bindBuffer(
 			WebGL.BufferUsage.Index,
 			indexBuffer.internal.contents as WebGLBuffer
 		);
@@ -904,15 +904,15 @@ export class RenderInner {
 
 	// TODO(thismarvin): The parameters are wrong!
 	drawIndexed(totalTriangles: number): void {
-		if (this.pipeline === null) {
+		if (this.#pipeline === null) {
 			throw new TypeError("A pipeline has not been set.");
 		}
 
-		this.gl.drawElements(
-			this.pipeline.descriptor.topology,
+		this.#gl.drawElements(
+			this.#pipeline.descriptor.topology,
 			totalTriangles * 3,
 			// The following line forces that the Index buffer must be a typeof Uint16Array.
-			this.gl.UNSIGNED_SHORT,
+			this.#gl.UNSIGNED_SHORT,
 			0
 		);
 	}
