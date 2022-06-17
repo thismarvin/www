@@ -12,14 +12,10 @@ function _createOrthographicCamera(
 	near: number,
 	far: number
 ): Matrix4 {
-	const view = Matrix4.createLookAt(
-		position,
-		Vector3.add(position, forward),
-		up
-	);
+	const view = Matrix4.createLookAt(position, position.add(forward), up);
 	const projection = Matrix4.createOrthographic(width, height, near, far);
 
-	return Matrix4.multiply(view, projection);
+	return view.multiply(projection);
 }
 
 const source = {
