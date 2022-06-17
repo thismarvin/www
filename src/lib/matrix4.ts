@@ -1,4 +1,4 @@
-import Vector3 from "./vector3";
+import type Vector3 from "./vector3";
 
 function _getEmptyData(): Float32Array {
 	return Float32Array.from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
@@ -88,118 +88,118 @@ export default class Matrix4 {
 		return `(${this.data[0]}, ${this.data[1]}, ${this.data[2]}, ${this.data[3]}) (${this.data[4]}, ${this.data[5]}, ${this.data[6]}, ${this.data[7]}) (${this.data[8]}, ${this.data[9]}, ${this.data[10]}, ${this.data[11]}) (${this.data[12]}, ${this.data[13]}, ${this.data[14]}, ${this.data[15]})`;
 	}
 
-	public static add(a: Matrix4, b: Matrix4): Matrix4 {
-		const temp = a.data.slice(0);
+	public add(other: Matrix4): Matrix4 {
+		const temp = this.data.slice(0);
 
 		for (let i = 0; i < temp.length; i++) {
-			temp[i] += b.data[i];
+			temp[i] += other.data[i];
 		}
 
 		return new Matrix4(temp);
 	}
 
-	public static subtract(a: Matrix4, b: Matrix4): Matrix4 {
-		const temp = a.data.slice(0);
+	public subtract(other: Matrix4): Matrix4 {
+		const temp = this.data.slice(0);
 
 		for (let i = 0; i < temp.length; i++) {
-			temp[i] -= b.data[i];
+			temp[i] -= other.data[i];
 		}
 
 		return new Matrix4(temp);
 	}
 
-	public static multiply(a: Matrix4, b: Matrix4): Matrix4 {
+	public multiply(other: Matrix4): Matrix4 {
 		const temp = new Float32Array(16).fill(0);
 
 		temp[0] =
-			a.data[0] * b.data[0] +
-			a.data[1] * b.data[4] +
-			a.data[2] * b.data[8] +
-			a.data[3] * b.data[12];
+			this.data[0] * other.data[0] +
+			this.data[1] * other.data[4] +
+			this.data[2] * other.data[8] +
+			this.data[3] * other.data[12];
 		temp[1] =
-			a.data[0] * b.data[1] +
-			a.data[1] * b.data[5] +
-			a.data[2] * b.data[9] +
-			a.data[3] * b.data[13];
+			this.data[0] * other.data[1] +
+			this.data[1] * other.data[5] +
+			this.data[2] * other.data[9] +
+			this.data[3] * other.data[13];
 		temp[2] =
-			a.data[0] * b.data[2] +
-			a.data[1] * b.data[6] +
-			a.data[2] * b.data[10] +
-			a.data[3] * b.data[14];
+			this.data[0] * other.data[2] +
+			this.data[1] * other.data[6] +
+			this.data[2] * other.data[10] +
+			this.data[3] * other.data[14];
 		temp[3] =
-			a.data[0] * b.data[3] +
-			a.data[1] * b.data[7] +
-			a.data[2] * b.data[11] +
-			a.data[3] * b.data[15];
+			this.data[0] * other.data[3] +
+			this.data[1] * other.data[7] +
+			this.data[2] * other.data[11] +
+			this.data[3] * other.data[15];
 
 		temp[4] =
-			a.data[4] * b.data[0] +
-			a.data[5] * b.data[4] +
-			a.data[6] * b.data[8] +
-			a.data[7] * b.data[12];
+			this.data[4] * other.data[0] +
+			this.data[5] * other.data[4] +
+			this.data[6] * other.data[8] +
+			this.data[7] * other.data[12];
 		temp[5] =
-			a.data[4] * b.data[1] +
-			a.data[5] * b.data[5] +
-			a.data[6] * b.data[9] +
-			a.data[7] * b.data[13];
+			this.data[4] * other.data[1] +
+			this.data[5] * other.data[5] +
+			this.data[6] * other.data[9] +
+			this.data[7] * other.data[13];
 		temp[6] =
-			a.data[4] * b.data[2] +
-			a.data[5] * b.data[6] +
-			a.data[6] * b.data[10] +
-			a.data[7] * b.data[14];
+			this.data[4] * other.data[2] +
+			this.data[5] * other.data[6] +
+			this.data[6] * other.data[10] +
+			this.data[7] * other.data[14];
 		temp[7] =
-			a.data[4] * b.data[3] +
-			a.data[5] * b.data[7] +
-			a.data[6] * b.data[11] +
-			a.data[7] * b.data[15];
+			this.data[4] * other.data[3] +
+			this.data[5] * other.data[7] +
+			this.data[6] * other.data[11] +
+			this.data[7] * other.data[15];
 
 		temp[8] =
-			a.data[8] * b.data[0] +
-			a.data[9] * b.data[4] +
-			a.data[10] * b.data[8] +
-			a.data[11] * b.data[12];
+			this.data[8] * other.data[0] +
+			this.data[9] * other.data[4] +
+			this.data[10] * other.data[8] +
+			this.data[11] * other.data[12];
 		temp[9] =
-			a.data[8] * b.data[1] +
-			a.data[9] * b.data[5] +
-			a.data[10] * b.data[9] +
-			a.data[11] * b.data[13];
+			this.data[8] * other.data[1] +
+			this.data[9] * other.data[5] +
+			this.data[10] * other.data[9] +
+			this.data[11] * other.data[13];
 		temp[10] =
-			a.data[8] * b.data[2] +
-			a.data[9] * b.data[6] +
-			a.data[10] * b.data[10] +
-			a.data[11] * b.data[14];
+			this.data[8] * other.data[2] +
+			this.data[9] * other.data[6] +
+			this.data[10] * other.data[10] +
+			this.data[11] * other.data[14];
 		temp[11] =
-			a.data[8] * b.data[3] +
-			a.data[9] * b.data[7] +
-			a.data[10] * b.data[11] +
-			a.data[11] * b.data[15];
+			this.data[8] * other.data[3] +
+			this.data[9] * other.data[7] +
+			this.data[10] * other.data[11] +
+			this.data[11] * other.data[15];
 
 		temp[12] =
-			a.data[12] * b.data[0] +
-			a.data[13] * b.data[4] +
-			a.data[14] * b.data[8] +
-			a.data[15] * b.data[12];
+			this.data[12] * other.data[0] +
+			this.data[13] * other.data[4] +
+			this.data[14] * other.data[8] +
+			this.data[15] * other.data[12];
 		temp[13] =
-			a.data[12] * b.data[1] +
-			a.data[13] * b.data[5] +
-			a.data[14] * b.data[9] +
-			a.data[15] * b.data[13];
+			this.data[12] * other.data[1] +
+			this.data[13] * other.data[5] +
+			this.data[14] * other.data[9] +
+			this.data[15] * other.data[13];
 		temp[14] =
-			a.data[12] * b.data[2] +
-			a.data[13] * b.data[6] +
-			a.data[14] * b.data[10] +
-			a.data[15] * b.data[14];
+			this.data[12] * other.data[2] +
+			this.data[13] * other.data[6] +
+			this.data[14] * other.data[10] +
+			this.data[15] * other.data[14];
 		temp[15] =
-			a.data[12] * b.data[3] +
-			a.data[13] * b.data[7] +
-			a.data[14] * b.data[11] +
-			a.data[15] * b.data[15];
+			this.data[12] * other.data[3] +
+			this.data[13] * other.data[7] +
+			this.data[14] * other.data[11] +
+			this.data[15] * other.data[15];
 
 		return new Matrix4(temp);
 	}
 
-	public static addScalar(a: Matrix4, scalar: number): Matrix4 {
-		const temp = a.data.slice(0);
+	public addScalar(scalar: number): Matrix4 {
+		const temp = this.data.slice(0);
 
 		for (let i = 0; i < temp.length; i++) {
 			temp[i] += scalar;
@@ -208,8 +208,8 @@ export default class Matrix4 {
 		return new Matrix4(temp);
 	}
 
-	public static subtractScalar(a: Matrix4, scalar: number): Matrix4 {
-		const temp = a.data.slice(0);
+	public subtractScalar(scalar: number): Matrix4 {
+		const temp = this.data.slice(0);
 
 		for (let i = 0; i < temp.length; i++) {
 			temp[i] -= scalar;
@@ -218,8 +218,8 @@ export default class Matrix4 {
 		return new Matrix4(temp);
 	}
 
-	public static multiplyScalar(a: Matrix4, scalar: number): Matrix4 {
-		const temp = a.data.slice(0);
+	public multiplyScalar(scalar: number): Matrix4 {
+		const temp = this.data.slice(0);
 
 		for (let i = 0; i < temp.length; i++) {
 			temp[i] *= scalar;
@@ -228,10 +228,10 @@ export default class Matrix4 {
 		return new Matrix4(temp);
 	}
 
-	public static divideScalar(a: Matrix4, scalar: number): Matrix4 {
+	public divideScalar(scalar: number): Matrix4 {
 		const temp = 1 / scalar;
 
-		return Matrix4.multiplyScalar(a, temp);
+		return this.multiplyScalar(temp);
 	}
 
 	public static createRotationX(angle: number): Matrix4 {
@@ -377,9 +377,9 @@ export default class Matrix4 {
 		cameraTarget: Vector3,
 		cameraUp: Vector3
 	): Matrix4 {
-		const a = Vector3.subtract(cameraPosition, cameraTarget).normalize();
-		const b = Vector3.cross(cameraUp, a).normalize();
-		const c = Vector3.cross(a, b);
+		const a = cameraPosition.subtract(cameraTarget).normalize();
+		const b = cameraUp.cross(a).normalize();
+		const c = a.cross(b);
 
 		const temp = _getIdentityData();
 
@@ -395,9 +395,9 @@ export default class Matrix4 {
 		temp[9] = c.z;
 		temp[10] = a.z;
 
-		temp[12] = -Vector3.dot(b, cameraPosition);
-		temp[13] = -Vector3.dot(c, cameraPosition);
-		temp[14] = -Vector3.dot(a, cameraPosition);
+		temp[12] = -b.dot(cameraPosition);
+		temp[13] = -c.dot(cameraPosition);
+		temp[14] = -a.dot(cameraPosition);
 
 		return new Matrix4(temp);
 	}

@@ -12,13 +12,13 @@ export default class Vector3 {
 	public static get ONE(): Vector3 {
 		return new Vector3(1, 1, 1);
 	}
-	public static get UNIT_X(): Vector3 {
+	public static get X(): Vector3 {
 		return new Vector3(1, 0, 0);
 	}
-	public static get UNIT_Y(): Vector3 {
+	public static get Y(): Vector3 {
 		return new Vector3(0, 1, 0);
 	}
-	public static get UNIT_Z(): Vector3 {
+	public static get Z(): Vector3 {
 		return new Vector3(0, 0, 1);
 	}
 	public static get LEFT(): Vector3 {
@@ -46,12 +46,12 @@ export default class Vector3 {
 		this.z = z;
 	}
 
-	public length(): number {
-		return Math.sqrt(this.lengthSquared());
-	}
-
 	public lengthSquared(): number {
 		return this.x ** 2 + this.y ** 2 + this.z ** 2;
+	}
+
+	public length(): number {
+		return Math.sqrt(this.lengthSquared());
 	}
 
 	public normalize(): Vector3 {
@@ -85,34 +85,126 @@ export default class Vector3 {
 		return `(${this.x}, ${this.y}, ${this.z})`;
 	}
 
-	public static distanceSquared(a: Vector3, b: Vector3): number {
-		const x = a.x - b.x;
-		const y = a.y - b.y;
-		const z = a.z - b.z;
+	public distanceSquared(other: Vector3): number {
+		const x = this.x - other.x;
+		const y = this.y - other.y;
+		const z = this.z - other.z;
 
 		return x ** 2 + y ** 2 + z ** 2;
 	}
 
-	public static distance(a: Vector3, b: Vector3): number {
-		return Math.sqrt(Vector3.distanceSquared(a, b));
+	public distance(other: Vector3): number {
+		return Math.sqrt(this.distanceSquared(other));
 	}
 
-	public static dot(a: Vector3, b: Vector3): number {
-		return a.x * b.x + a.y * b.y + a.z * b.z;
+	public dot(other: Vector3): number {
+		return this.x * other.x + this.y * other.y + this.z * other.z;
 	}
 
-	public static lerp(a: Vector3, b: Vector3, step: number): Vector3 {
-		const x = MathExt.lerp(a.x, b.x, step);
-		const y = MathExt.lerp(a.y, b.y, step);
-		const z = MathExt.lerp(a.z, b.z, step);
+	public lerp(other: Vector3, step: number): Vector3 {
+		const x = MathExt.lerp(this.x, other.x, step);
+		const y = MathExt.lerp(this.y, other.y, step);
+		const z = MathExt.lerp(this.z, other.z, step);
 
 		return new Vector3(x, y, z);
 	}
 
-	public static lerpPrecise(a: Vector3, b: Vector3, step: number): Vector3 {
-		const x = MathExt.lerpPrecise(a.x, b.x, step);
-		const y = MathExt.lerpPrecise(a.y, b.y, step);
-		const z = MathExt.lerpPrecise(a.z, b.z, step);
+	public lerpPrecise(other: Vector3, step: number): Vector3 {
+		const x = MathExt.lerpPrecise(this.x, other.x, step);
+		const y = MathExt.lerpPrecise(this.y, other.y, step);
+		const z = MathExt.lerpPrecise(this.z, other.z, step);
+
+		return new Vector3(x, y, z);
+	}
+
+	public cross(other: Vector3): Vector3 {
+		const x = this.y * other.z - other.y * this.z;
+		const y = this.z * other.x - other.z * this.x;
+		const z = this.x * other.y - other.x * this.y;
+
+		return new Vector3(x, y, z);
+	}
+
+	public add(other: Vector3): Vector3 {
+		const x = this.x + other.x;
+		const y = this.y + other.y;
+		const z = this.z + other.z;
+
+		return new Vector3(x, y, z);
+	}
+
+	public subtract(other: Vector3): Vector3 {
+		const x = this.x - other.x;
+		const y = this.y - other.y;
+		const z = this.z - other.z;
+
+		return new Vector3(x, y, z);
+	}
+
+	public multiply(other: Vector3): Vector3 {
+		const x = this.x * other.x;
+		const y = this.y * other.y;
+		const z = this.z * other.z;
+
+		return new Vector3(x, y, z);
+	}
+
+	public divide(other: Vector3): Vector3 {
+		const x = this.x / other.x;
+		const y = this.y / other.y;
+		const z = this.z / other.z;
+
+		return new Vector3(x, y, z);
+	}
+
+	public addScalar(scalar: number): Vector3 {
+		const x = this.x + scalar;
+		const y = this.y + scalar;
+		const z = this.z + scalar;
+
+		return new Vector3(x, y, z);
+	}
+
+	public subtractScalar(scalar: number): Vector3 {
+		const x = this.x - scalar;
+		const y = this.y - scalar;
+		const z = this.z - scalar;
+
+		return new Vector3(x, y, z);
+	}
+
+	public multiplyScalar(scalar: number): Vector3 {
+		const x = this.x * scalar;
+		const y = this.y * scalar;
+		const z = this.z * scalar;
+
+		return new Vector3(x, y, z);
+	}
+
+	public divideScalar(scalar: number): Vector3 {
+		const x = this.x / scalar;
+		const y = this.y / scalar;
+		const z = this.z / scalar;
+
+		return new Vector3(x, y, z);
+	}
+
+	public transform(matrix: Matrix4): Vector3 {
+		const x =
+			this.x * matrix.data[0] +
+			this.y * matrix.data[4] +
+			this.z * matrix.data[8] +
+			matrix.data[12];
+		const y =
+			this.x * matrix.data[1] +
+			this.y * matrix.data[5] +
+			this.z * matrix.data[9] +
+			matrix.data[13];
+		const z =
+			this.x * matrix.data[2] +
+			this.y * matrix.data[6] +
+			this.z * matrix.data[10] +
+			matrix.data[14];
 
 		return new Vector3(x, y, z);
 	}
@@ -135,85 +227,5 @@ export default class Vector3 {
 			radius * Math.sin(azimuth) * Math.sin(inclination),
 			radius * Math.cos(azimuth)
 		);
-	}
-
-	public static cross(a: Vector3, b: Vector3): Vector3 {
-		const x = a.y * b.z - b.y * a.z;
-		const y = a.z * b.x - b.z * a.x;
-		const z = a.x * b.y - b.x * a.y;
-
-		return new Vector3(x, y, z);
-	}
-
-	public static add(a: Vector3, b: Vector3): Vector3 {
-		const x = a.x + b.x;
-		const y = a.y + b.y;
-		const z = a.z + b.z;
-
-		return new Vector3(x, y, z);
-	}
-
-	public static subtract(a: Vector3, b: Vector3): Vector3 {
-		const x = a.x - b.x;
-		const y = a.y - b.y;
-		const z = a.z - b.z;
-
-		return new Vector3(x, y, z);
-	}
-
-	public static multiply(a: Vector3, b: Vector3): Vector3 {
-		const x = a.x * b.x;
-		const y = a.y * b.y;
-		const z = a.z * b.z;
-
-		return new Vector3(x, y, z);
-	}
-
-	public static divide(a: Vector3, b: Vector3): Vector3 {
-		const x = a.x / b.x;
-		const y = a.y / b.y;
-		const z = a.z / b.z;
-
-		return new Vector3(x, y, z);
-	}
-
-	public static addScalar(a: Vector3, scalar: number): Vector3 {
-		const x = a.x + scalar;
-		const y = a.y + scalar;
-		const z = a.z + scalar;
-
-		return new Vector3(x, y, z);
-	}
-
-	public static subtractScalar(a: Vector3, scalar: number): Vector3 {
-		const x = a.x - scalar;
-		const y = a.y - scalar;
-		const z = a.z - scalar;
-
-		return new Vector3(x, y, z);
-	}
-
-	public static multiplyScalar(a: Vector3, scalar: number): Vector3 {
-		const x = a.x * scalar;
-		const y = a.y * scalar;
-		const z = a.z * scalar;
-
-		return new Vector3(x, y, z);
-	}
-
-	public static divideScalar(a: Vector3, scalar: number): Vector3 {
-		const x = a.x / scalar;
-		const y = a.y / scalar;
-		const z = a.z / scalar;
-
-		return new Vector3(x, y, z);
-	}
-
-	public static transform(a: Vector3, b: Matrix4): Vector3 {
-		const x = a.x * b.data[0] + a.y * b.data[4] + a.z * b.data[8] + b.data[12];
-		const y = a.x * b.data[1] + a.y * b.data[5] + a.z * b.data[9] + b.data[13];
-		const z = a.x * b.data[2] + a.y * b.data[6] + a.z * b.data[10] + b.data[14];
-
-		return new Vector3(x, y, z);
 	}
 }
