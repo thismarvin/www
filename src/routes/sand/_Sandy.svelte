@@ -2,7 +2,7 @@
 	import Color from "$lib/color";
 	import PaletteEntry from "./_PaletteEntry.svelte";
 	import Pixels from "$lib/pickles";
-	import SmartPointer from "$lib/pointer";
+	import SmartPointer, { PointerButton } from "$lib/pointer";
 	import type { InitOutput } from "./sand";
 	import { Material, Tint, World } from "./sand";
 	import { browser } from "$app/env";
@@ -108,8 +108,9 @@
 
 	let currentMaterial = Material.Sand;
 
-	const smartPointer = new SmartPointer();
-	let startingPosition: number[] = [0, 0];
+	let smartPointer: SmartPointer | null = null;
+	let previousPosition: number[] | null = null;
+	let currentPosition: number[] | null = null;
 
 	function setCurrentMaterial(material: number): void {
 		currentMaterial = material;
@@ -208,21 +209,34 @@
 	}
 
 	function update() {
-		if (startingPosition !== null) {
-			startingPosition = [smartPointer.x ?? 0, smartPointer.y ?? 0];
+		if (smartPointer === null) {
+			return;
 		}
 
-		smartPointer.update();
+		smartPointer.poll();
 
-		if (smartPointer.pressed("LeftClick")) {
-			startingPosition = [smartPointer.x ?? 0, smartPointer.y ?? 0];
+		const state = smartPointer.getState();
+
+		if (state === null) {
+			return;
 		}
 
-		if (smartPointer.pressing("LeftClick")) {
-			const x1 = Math.floor(startingPosition[0] / scale);
-			const y1 = Math.floor(startingPosition[1] / scale);
-			const x2 = Math.floor((smartPointer.x ?? 0) / scale);
-			const y2 = Math.floor((smartPointer.y ?? 0) / scale);
+		previousPosition = currentPosition;
+		currentPosition = [state.x, state.y];
+
+		if (previousPosition === null || currentPosition === null) {
+			return;
+		}
+
+		if (state.pressed(PointerButton.Primary)) {
+			previousPosition = currentPosition;
+		}
+
+		if (state.pressing(PointerButton.Primary)) {
+			const x1 = Math.floor(previousPosition[0] / scale);
+			const y1 = Math.floor(previousPosition[1] / scale);
+			const x2 = Math.floor(currentPosition[0] / scale);
+			const y2 = Math.floor(currentPosition[1] / scale);
 
 			world.paint(
 				x1,
@@ -319,7 +333,7 @@
 		canvas.style.width = `${parent.clientWidth}px`;
 		canvas.style.height = `${parent.clientHeight}px`;
 
-		smartPointer.attachElement(parent);
+		smartPointer = new SmartPointer(parent);
 
 		scale = parseInt(canvas.style.width) / width;
 
