@@ -1,174 +1,151 @@
+export enum PointerButton {
+	// Usually the left button.
+	Primary = 1,
+	// Usually the right button.
+	Secondary = 2,
+	// Usually the mouse wheel button or middle button.
+	Auxiliary = 4,
+	// Usually the "Browser Back" button.
+	Fourth = 8,
+	// Usually the "Browser Forward" button.
+	Fifth = 16,
+}
+
+export function isButtonDown(
+	event: PointerEvent,
+	button: PointerButton
+): boolean {
+	return (event.buttons & button) !== 0;
+}
+
+export function isButtonUp(
+	event: PointerEvent,
+	button: PointerButton
+): boolean {
+	return !isButtonDown(event, button);
+}
+
+export type PointerStateParams = {
+	x: number;
+	y: number;
+	previousEvent: PointerEvent;
+	currentEvent: PointerEvent;
+};
+
 export class PointerState {
 	public readonly x: number;
 	public readonly y: number;
-	public readonly buttons: number;
-	public readonly lastEvent: PointerEvent;
+	public readonly event: PointerEvent;
 
-	constructor(x: number, y: number, buttons: number, lastEvent: PointerEvent) {
-		this.x = x;
-		this.y = y;
-		this.buttons = buttons;
-		this.lastEvent = lastEvent;
+	readonly #previousEvent: PointerEvent;
 
-		Object.defineProperty(this, "x", {
-			writable: false,
-		});
-		Object.defineProperty(this, "y", {
-			writable: false,
-		});
-		Object.defineProperty(this, "buttons", {
-			writable: false,
-		});
-		Object.defineProperty(this, "lastEvent", {
-			writable: false,
-		});
+	constructor(params: PointerStateParams) {
+		this.x = params.x;
+		this.y = params.y;
+		this.event = params.currentEvent;
+		this.#previousEvent = params.previousEvent;
 	}
 
-	/**
-	 * Returns whether or not a given button is pressed.
-	 * @param button A single button, or multiple comma separated buttons (e.g. leftclick, rightclick, etc.).
-	 */
-	public isButtonDown(button: string): boolean {
-		// Format and separate "button" parameter into individual strings;
-		const formattedButtons = button.toLocaleLowerCase().split(",");
-		// Duplicate button strings would break this method, so get rid of them!
-		const formattedButtonsSet = new Set<string>(formattedButtons);
-
-		// Compute the cumulative value of all entries in formatedButtonsSet.
-		let computedButtons = 0;
-		for (const entry of formattedButtonsSet) {
-			switch (entry.trim()) {
-				case "leftclick":
-					computedButtons += 1;
-					break;
-				case "rightclick":
-					computedButtons += 2;
-					break;
-				case "middleclick":
-					computedButtons += 4;
-					break;
-			}
-		}
-
-		return (this.buttons & computedButtons) !== 0;
+	public pressed(buttons: PointerButton): boolean {
+		return (
+			isButtonUp(this.#previousEvent, buttons) &&
+			isButtonDown(this.event, buttons)
+		);
 	}
 
-	/**
-	 * Returns whether or not a given button is not pressed.
-	 * @param button A single button, or multiple comma separated buttons (e.g. leftclick, rightclick, etc.).
-	 */
-	public isButtonUp(button: string): boolean {
-		return !this.isButtonDown(button);
+	public pressing(buttons: PointerButton): boolean {
+		return isButtonDown(this.event, buttons);
+	}
+
+	public released(buttons: PointerButton): boolean {
+		return (
+			isButtonDown(this.#previousEvent, buttons) &&
+			isButtonUp(this.event, buttons)
+		);
 	}
 }
 
 export default class SmartPointer {
-	public get x(): number | null {
-		return this.#currentPointerState === null
-			? null
-			: this.#currentPointerState.x;
+	#parent: HTMLElement;
+	#active: boolean;
+	#x: number | null;
+	#y: number | null;
+	#event: PointerEvent | null;
+	#previousEvent: PointerEvent | null;
+	#currentEvent: PointerEvent | null;
+	#onPointerEvent: (event: PointerEvent) => void;
+	#onBlur: () => void;
+
+	constructor(parent: HTMLElement) {
+		this.#parent = parent;
+		this.#previousEvent = null;
+		this.#currentEvent = null;
+		this.#active = false;
+		this.#x = null;
+		this.#y = null;
+		this.#event = null;
+		this.#onPointerEvent = (event: PointerEvent) => {
+			this.#active = true;
+			this.#x = event.pageX - this.#parent.offsetLeft;
+			this.#y = event.pageY - this.#parent.offsetTop;
+			this.#event = event;
+		};
+		this.#onBlur = () => {
+			this.#active = false;
+		};
+
+		this.setupEventListeners();
 	}
-	public get y(): number | null {
-		return this.#currentPointerState === null
-			? null
-			: this.#currentPointerState.y;
+
+	private removeEventListeners(): void {
+		this.#parent.removeEventListener(
+			"pointermove",
+			this.#onPointerEvent,
+			false
+		);
+		this.#parent.removeEventListener(
+			"pointerdown",
+			this.#onPointerEvent,
+			false
+		);
+		this.#parent.removeEventListener("pointerup", this.#onPointerEvent, false);
+		this.#parent.removeEventListener("blur", this.#onBlur, false);
 	}
 
-	#element: HTMLElement | null;
-	#previousPointerState: PointerState | null;
-	#currentPointerState: PointerState | null;
-
-	#nextX: number;
-	#nextY: number;
-	#nextButtons: number;
-	#nextLastEvent: PointerEvent | null;
-
-	constructor() {
-		this.#element = null;
-		this.#previousPointerState = null;
-		this.#currentPointerState = null;
-		this.#nextX = 0;
-		this.#nextY = 0;
-		this.#nextButtons = 0;
-		this.#nextLastEvent = null;
+	private setupEventListeners(): void {
+		this.#parent.addEventListener("pointermove", this.#onPointerEvent, false);
+		this.#parent.addEventListener("pointerdown", this.#onPointerEvent, false);
+		this.#parent.addEventListener("pointerup", this.#onPointerEvent, false);
+		this.#parent.addEventListener("blur", this.#onBlur, false);
 	}
 
 	public attachElement(element: HTMLElement): void {
-		this.#element = element;
+		this.removeEventListeners();
+		this.#parent = element;
+		this.setupEventListeners();
+	}
 
-		this.#element.addEventListener("pointermove", (event) => {
-			if (this.#element === null) {
-				throw new Error("unreachable");
-			}
-
-			this.#nextX = event.pageX - this.#element.offsetLeft;
-			this.#nextY = event.pageY - this.#element.offsetTop;
-			this.#nextButtons = event.buttons;
-			this.#nextLastEvent = event;
-		});
-		this.#element.addEventListener("pointerdown", (event) => {
-			if (this.#element === null) {
-				throw new Error("unreachable");
-			}
-
-			this.#nextX = event.pageX - this.#element.offsetLeft;
-			this.#nextY = event.pageY - this.#element.offsetTop;
-			this.#nextButtons = event.buttons;
-			this.#nextLastEvent = event;
-		});
-		this.#element.addEventListener("pointerup", (event) => {
-			if (this.#element === null) {
-				throw new Error("unreachable");
-			}
-
-			this.#nextX = event.pageX - this.#element.offsetLeft;
-			this.#nextY = event.pageY - this.#element.offsetTop;
-			this.#nextButtons = event.buttons;
-			this.#nextLastEvent = event;
-		});
-		this.#element.addEventListener("blur", () => {
-			this.#nextButtons = 0;
-			this.#nextLastEvent = null;
-		});
+	public poll(): void {
+		this.#previousEvent = this.#currentEvent;
+		this.#currentEvent = this.#event;
 	}
 
 	public getState(): PointerState | null {
-		if (this.#nextLastEvent == null) {
+		if (
+			!this.#active ||
+			this.#x === null ||
+			this.#y === null ||
+			this.#currentEvent === null ||
+			this.#previousEvent === null
+		) {
 			return null;
 		}
 
-		return new PointerState(
-			this.#nextX,
-			this.#nextY,
-			this.#nextButtons,
-			this.#nextLastEvent
-		);
-	}
-
-	public pressed(button: string): boolean {
-		if (
-			this.#previousPointerState === null ||
-			this.#currentPointerState === null
-		) {
-			return false;
-		}
-
-		return (
-			this.#previousPointerState.isButtonUp(button) &&
-			this.#currentPointerState.isButtonDown(button)
-		);
-	}
-
-	public pressing(button: string): boolean {
-		if (this.#currentPointerState === null) {
-			return false;
-		}
-
-		return this.#currentPointerState.isButtonDown(button);
-	}
-
-	public update(): void {
-		this.#previousPointerState = this.#currentPointerState;
-		this.#currentPointerState = this.getState();
+		return new PointerState({
+			x: this.#x,
+			y: this.#y,
+			previousEvent: this.#previousEvent,
+			currentEvent: this.#currentEvent,
+		});
 	}
 }
