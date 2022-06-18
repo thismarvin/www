@@ -135,6 +135,73 @@ export function createBufferInit(
 	}
 }
 
+export function createTexture(
+	gl: RenderingContext,
+	width: number,
+	height: number,
+	pixels: Uint8Array
+) {
+	const texture = gl.createTexture();
+
+	if (texture === null) {
+		throw new Error("Something went wrong; could not create WebGLTexture.");
+	}
+
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.texImage2D(
+		gl.TEXTURE_2D,
+		0,
+		gl.RGBA,
+		width,
+		height,
+		0,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		pixels
+	);
+
+	_textureMaintenance(gl, width, height);
+
+	return texture;
+}
+
+export function createTextureFromImage(
+	gl: RenderingContext,
+	image: TexImageSource
+): WebGLTexture {
+	const texture = gl.createTexture();
+
+	if (texture === null) {
+		throw new Error("Something went wrong; could not create WebGLTexture.");
+	}
+
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+	_textureMaintenance(gl, image.width, image.height);
+
+	return texture;
+}
+
+function _isPowerOfTwo(value: number) {
+	return (value & (value - 1)) === 0;
+}
+
+function _textureMaintenance(
+	gl: RenderingContext,
+	width: number,
+	height: number
+) {
+	if (_isPowerOfTwo(width) && _isPowerOfTwo(height)) {
+		gl.generateMipmap(gl.TEXTURE_2D);
+	} else {
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+	}
+}
+
 function _allocateBuffer(
 	gl: RenderingContext,
 	bufferUsage: BufferUsage,
