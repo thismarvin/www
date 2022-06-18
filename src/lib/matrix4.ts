@@ -1,3 +1,5 @@
+import type Quaternion from "./rotation";
+import type Transform from "./transform";
 import type Vector3 from "./vector3";
 
 function _getEmptyData(): Float32Array {
@@ -400,5 +402,55 @@ export default class Matrix4 {
 		temp[14] = -a.dot(cameraPosition);
 
 		return new Matrix4(temp);
+	}
+
+	public static fromQuaternion(value: Quaternion): Matrix4 {
+		// Yoinked from:
+		// https://en.wikipedia.org/wiki/Rotation_matrix
+
+		const data = Float32Array.from([
+			1 - 2 * value.y ** 2 - 2 * value.z ** 2,
+			2 * value.x * value.y - 2 * value.z * value.w,
+			2 * value.x * value.z + 2 * value.y * value.w,
+			0,
+			2 * value.x * value.y + 2 * value.z * value.w,
+			1 - 2 * value.x ** 2 - 2 * value.z ** 2,
+			2 * value.y * value.z - 2 * value.x * value.w,
+			0,
+			2 * value.x * value.z - 2 * value.y * value.w,
+			2 * value.y * value.z + 2 * value.x * value.w,
+			1 - 2 * value.x ** 2 - 2 * value.y ** value.y,
+			0,
+			0,
+			0,
+			0,
+			1,
+		]);
+
+		return new Matrix4(data);
+	}
+
+	public static fromTransform(value: Transform): Matrix4 {
+		const scale = Matrix4.createScale(
+			value.scale.x,
+			value.scale.y,
+			value.scale.z
+		);
+		const origin = Matrix4.createTranslation(
+			value.origin.x,
+			value.origin.y,
+			value.origin.z
+		);
+		const rotation = Matrix4.fromQuaternion(value.rotation);
+		const translation = Matrix4.createTranslation(
+			value.translation.x,
+			value.translation.y,
+			value.translation.z
+		);
+
+		return Matrix4.IDENTITY.multiply(scale)
+			.multiply(origin)
+			.multiply(rotation)
+			.multiply(translation);
 	}
 }
