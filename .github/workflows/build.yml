@@ -1,14 +1,12 @@
 name: CI
 
 on:
-  push:
-    branches: ["dev"]
   pull_request:
     branches: ["dev"]
   workflow_dispatch:
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,5 +17,27 @@ jobs:
           cache: "npm"
       - run: npm ci
       - run: npm run lint
+  check:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+          cache: "npm"
+      - run: npm ci
       - run: npm run check
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+          cache: "npm"
+      - run: npm ci
       - run: npm run build
