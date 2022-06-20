@@ -171,7 +171,7 @@
 				return airColorsHex[0];
 			}
 			default: {
-				return Color.default();
+				return Color.BLACK;
 			}
 		}
 	}
@@ -273,7 +273,7 @@
 				let alpha = getAlpha(material, x, y);
 
 				if (alpha !== 1) {
-					color = Color.multiply(color, alpha);
+					color = color.multiply(alpha);
 				}
 
 				pixels.set(x, y, color);
