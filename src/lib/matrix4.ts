@@ -419,7 +419,7 @@ export default class Matrix4 {
 			0,
 			2 * value.x * value.z - 2 * value.y * value.w,
 			2 * value.y * value.z + 2 * value.x * value.w,
-			1 - 2 * value.x ** 2 - 2 * value.y ** value.y,
+			1 - 2 * value.x ** 2 - 2 * value.y ** 2,
 			0,
 			0,
 			0,
