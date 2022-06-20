@@ -10,6 +10,25 @@ export default class Color {
 	public readonly b: number;
 	public readonly a: number;
 
+	public static get TRANSPARENT(): Color {
+		return new Color(0, 0, 0, 0);
+	}
+	public static get BLACK(): Color {
+		return new Color(0, 0, 0, 1);
+	}
+	public static get WHITE(): Color {
+		return new Color(255, 255, 255, 1);
+	}
+	public static get RED(): Color {
+		return new Color(255, 0, 0, 1);
+	}
+	public static get GREEN(): Color {
+		return new Color(0, 255, 0, 1);
+	}
+	public static get BLUE(): Color {
+		return new Color(0, 0, 255, 1);
+	}
+
 	constructor(r: number, g: number, b: number, a: number) {
 		this.r = r;
 		this.g = g;
@@ -17,16 +36,16 @@ export default class Color {
 		this.a = a;
 	}
 
-	public static default(): Color {
-		return new Color(0, 0, 0, 255);
+	public intoArray(): Uint8ClampedArray {
+		return Uint8ClampedArray.from([this.r, this.g, this.b, this.a]);
 	}
 
-	public static multiply(color: Color, alpha: number): Color {
+	public multiply(alpha: number): Color {
 		const tmp = clamp(alpha, 0, 1);
 
-		const r = _clampValue(color.r * tmp);
-		const g = _clampValue(color.g * tmp);
-		const b = _clampValue(color.b * tmp);
+		const r = _clampValue(this.r * tmp);
+		const g = _clampValue(this.g * tmp);
+		const b = _clampValue(this.b * tmp);
 		const a = 255 * tmp;
 
 		return new Color(r, g, b, a);
@@ -41,9 +60,7 @@ export default class Color {
 			return new Color(r, g, b, 255);
 		}
 
-		const temp = new Color(r, g, b, 255);
-
-		return Color.multiply(temp, a);
+		return new Color(r, g, b, 255).multiply(a);
 	}
 
 	public static fromHexString(value: string, a?: number): Color {
@@ -65,19 +82,5 @@ export default class Color {
 		const hexAsNumber = parseInt(sanitized, 16);
 
 		return Color.fromHex(hexAsNumber, a);
-	}
-
-	public static fromRgb(r: number, g: number, b: number, a?: number): Color {
-		const sanitizedR = _clampValue(r);
-		const sanitizedG = _clampValue(g);
-		const sanitizedB = _clampValue(b);
-
-		if (a === undefined) {
-			return new Color(sanitizedR, sanitizedG, sanitizedB, 255);
-		}
-
-		const temp = new Color(sanitizedR, sanitizedG, sanitizedB, 255);
-
-		return Color.multiply(temp, a);
 	}
 }
