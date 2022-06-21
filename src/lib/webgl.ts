@@ -139,7 +139,7 @@ export function createTexture(
 	gl: RenderingContext,
 	width: number,
 	height: number,
-	pixels: Uint8Array
+	pixels: Uint8ClampedArray
 ) {
 	const texture = gl.createTexture();
 
@@ -160,7 +160,7 @@ export function createTexture(
 		pixels
 	);
 
-	_textureMaintenance(gl, width, height);
+	_textureMaintenance(gl);
 
 	return texture;
 }
@@ -178,28 +178,22 @@ export function createTextureFromImage(
 	gl.bindTexture(gl.TEXTURE_2D, texture);
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
-	_textureMaintenance(gl, image.width, image.height);
+	_textureMaintenance(gl);
 
 	return texture;
 }
 
-function _isPowerOfTwo(value: number) {
-	return (value & (value - 1)) === 0;
-}
+function _textureMaintenance(gl: RenderingContext) {
+	gl.generateMipmap(gl.TEXTURE_2D);
 
-function _textureMaintenance(
-	gl: RenderingContext,
-	width: number,
-	height: number
-) {
-	if (_isPowerOfTwo(width) && _isPowerOfTwo(height)) {
-		gl.generateMipmap(gl.TEXTURE_2D);
-	} else {
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-	}
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(
+		gl.TEXTURE_2D,
+		gl.TEXTURE_MIN_FILTER,
+		gl.LINEAR_MIPMAP_LINEAR
+	);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 }
 
 function _allocateBuffer(
