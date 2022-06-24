@@ -437,15 +437,15 @@ export default class Matrix4 {
 			value.scale.z
 		);
 		const origin = Matrix4.createTranslation(
-			value.origin.x,
-			value.origin.y,
-			value.origin.z
+			-value.origin.x,
+			-value.origin.y,
+			-value.origin.z
 		);
 		const rotation = Matrix4.fromQuaternion(value.rotation);
 		const translation = Matrix4.createTranslation(
-			value.translation.x,
-			value.translation.y,
-			value.translation.z
+			value.origin.x + value.translation.x,
+			value.origin.y + value.translation.y,
+			value.origin.z + value.translation.z
 		);
 
 		return Matrix4.IDENTITY.multiply(scale)
